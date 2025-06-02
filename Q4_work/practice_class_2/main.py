@@ -65,4 +65,3 @@ async def handle_message(message : cl.Message):
         if event.type == "raw_response_event" and isinstance(event.data ,ResponseTextDeltaEvent):
             await msg.stream_token(event.data.delta)
     history.append({"role":"assistant","content":result.final_output})
-    # await cl.Message(content = result.final_output).send()
