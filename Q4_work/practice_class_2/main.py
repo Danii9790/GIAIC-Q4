@@ -37,10 +37,10 @@ agent = Agent(
     model=model,
     name="Assistant",
     instructions="you are a helpful assistant" # Set persona( mean kis ky assistant ho.example:governor ky ho,Sir zia ky assitant ho , ya kisi or ky )
-)
+ )
 # By default Runner is Async . (Sync) => mean agent ko task da di ab jb bi task complete ho jb mujy response do chahiye 5 minute lagy ya 10 minute .
 # (Async) mean task bi ho raha hn is ky sath baki or km bi chl raha hn.jb task complete ho ga await kr ky reponse da ga.
-# result = Runner.run_sync(agent,"who is the fonder of pakistan",run_config=config) # Runner is used to communicate between client to server (sync,async) 
+# result = Runner.run_sync(agent,"write 10 words on ai",run_config=config) # Runner is used to communicate between client to server (sync,async) 
 # print(result.final_output)
 
 @cl.on_chat_start

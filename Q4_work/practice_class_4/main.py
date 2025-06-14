@@ -69,3 +69,6 @@ def demo_bad_usage():
         
 
 demo_bad_usage()
+
+
+# Core features of OpenAI-SDK Vender locking ==> Means chatcompletionsmodel (connective for other llm or models)
