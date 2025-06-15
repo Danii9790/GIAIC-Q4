@@ -218,44 +218,44 @@ def get_doctors() -> dict:
         }
     }
 
-# Function Tool: Send appointment to webhook
+# Function Tool: Send appointment to webhook (your Vercel FastAPI)
 @function_tool
 def send_doctor_request(patient_name: str, doctor_name: str, date: str, time: str) -> str:
     try:
         response = requests.post(
-            "https://giaic-q4.vercel.app/set-appointment",
+            "https://giaic-q4-production.up.railway.app/set-appointment",  # 👈 Your webhook URL
             json={
                 "patient_name": patient_name,
                 "doctor_name": doctor_name,
                 "date": date,
-                "time": time,
-                "patient_whatsapp": "whatsapp:+923196560895"
-            },
-            timeout=10
+                "time": time
+            }
         )
+
         if response.status_code == 200:
             return "✅ Appointment request sent to doctor. Awaiting doctor's confirmation via WhatsApp..."
         else:
-            return f"❌ Webhook failed with status code: {response.status_code}, Response: {response.text}"
+            return f"❌ Webhook failed with status code: {response.status_code}"
     except Exception as e:
-        return f"❌ Error contacting webhook: {str(e)}"
+        return f"❌ Error contacting webhook: {e}"
 
-# Function Tool: Save confirmation to file
+# Function Tool: Save confirmation to file (for backup/log)
 @function_tool
 def confirm_and_notify_patient(patient_name: str, doctor_name: str, date: str, time: str) -> str:
     try:
         message = (
             f"✅ Hello {patient_name}, your appointment with {doctor_name} is confirmed for {date} at {time}."
         )
+        # Send to patient via WhatsApp
         twilio_client.messages.create(
             from_=TWILIO_FROM,
-            to="whatsapp:+923196560895",
+            to="whatsapp:+923196560895",  # Patient number
             body=message
         )
         save_to_json(patient_name, doctor_name, date, time)
         return "✅ Patient notified and data saved."
     except Exception as e:
-        return f"❌ Failed to notify patient: {str(e)}"
+        return f"❌ Failed to notify patient: {e}"
 
 # Save appointment to local JSON file
 def save_to_json(patient_name, doctor_name, date, time):
@@ -265,7 +265,7 @@ def save_to_json(patient_name, doctor_name, date, time):
         "date": date,
         "time": time
     }
-    file = "/tmp/appointments.json"
+    file = "appointments.json"
     if os.path.exists(file):
         with open(file, "r") as f:
             data = json.load(f)
@@ -275,7 +275,7 @@ def save_to_json(patient_name, doctor_name, date, time):
     with open(file, "w") as f:
         json.dump(data, f, indent=2)
 
-# Agent Setup
+# ------------------ Agent Setup ------------------
 agent = Agent(
     name="DoctorBot",
     instructions="""
@@ -283,16 +283,16 @@ You are a helpful assistant for booking doctor appointments.
 
 1. Use `get_doctors` to show available doctors.
 2. Ask user for patient name, doctor, date, and time.
-3. Use `send_doctor_request` to notify doctor on WhatsApp via webhook.
-4. Inform user that the system is waiting for doctor's confirmation.
-5. Once doctor confirms (handled by webhook), `confirm_and_notify_patient` will notify patient via WhatsApp.
+3. Use `send_doctor_request` to notify doctor on WhatsApp.
+4. Wait for doctor reply via webhook.
+5. Then use `confirm_and_notify_patient` to notify patient via WhatsApp.
 6. Be clear and assist step-by-step.
 """,
     model=model,
     tools=[get_doctors, send_doctor_request, confirm_and_notify_patient]
 )
 
-# Streamlit UI
+# ------------------ Streamlit UI ------------------
 st.set_page_config(page_title="DoctorBot", page_icon="🩺")
 st.title("🩺 Doctor Appointment Assistant")
 st.markdown("Book appointments and get WhatsApp confirmation from doctors.")

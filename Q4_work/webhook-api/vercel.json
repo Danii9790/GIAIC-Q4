@@ -1,26 +1,9 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "webhook.py",
-      "use": "@vercel/python",
-      "config": {
-        "runtime": "python3.11"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/set-appointment",
-      "dest": "webhook.py"
-    },
-    {
-      "src": "/webhook",
-      "dest": "webhook.py"
-    }
-  ],
-  "env": {
-    "TWILIO_ACC_SID": "@twilio_acc_sid",
-    "TWILIO_AUTH_TOKEN": "@twilio_auth_token"
+    "builds": [
+      { "src": "webhook.py", "use": "@vercel/python" }
+    ],
+    "routes": [
+      { "src": "/.*", "dest": "/webhook.py" }
+    ]
   }
-}
+  
