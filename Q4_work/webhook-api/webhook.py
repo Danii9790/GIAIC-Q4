@@ -12,6 +12,12 @@ client = Client(os.getenv("TWILIO_ACC_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
 TWILIO_FROM = "whatsapp:+14155238886"  # Twilio Sandbox Number
 PATIENT_NUMBER = "whatsapp:+923196560895"  # registered patient number
 
+
+@app.get("/")
+async def root():
+    return {"message": "Webhook is live!"}
+
+
 @app.post("/whatsapp")
 async def receive_whatsapp(request: Request):
     form = await request.form()
