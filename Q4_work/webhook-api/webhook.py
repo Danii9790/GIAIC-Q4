@@ -17,7 +17,6 @@ PATIENT_NUMBER = "whatsapp:+923196560895"  # registered patient number
 async def root():
     return {"message": "Webhook is live!"}
 
-
 @app.post("/whatsapp")
 async def receive_whatsapp(request: Request):
     form = await request.form()
