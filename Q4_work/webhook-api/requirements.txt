@@ -1,4 +1,7 @@
-fastapi
-uvicorn
-twilio
-python-dotenv
+streamlit 
+fastapi 
+uvicorn 
+twilio 
+python-dotenv 
+requests 
+openai
