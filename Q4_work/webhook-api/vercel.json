@@ -1,9 +1,7 @@
 {
   "version": 2,
-  "framework": null,
   "functions": {
     "webhook.py": {
-      "handler": "webhook.app",
       "runtime": "python3.9"
     }
   },
