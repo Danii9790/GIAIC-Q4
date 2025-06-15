@@ -1,0 +1,9 @@
+{
+    "builds": [
+      { "src": "webhook.py", "use": "@vercel/python" }
+    ],
+    "routes": [
+      { "src": "/.*", "dest": "/webhook.py" }
+    ]
+  }
+  
