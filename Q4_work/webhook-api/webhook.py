@@ -39,10 +39,13 @@ async def set_appointment(appointment: Appointment):
         return {"status": "success", "message": "Sent to doctor on WhatsApp."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
-
 @app.post("/whatsapp")
 async def receive_whatsapp(request: Request):
     form = await request.form()
+
+    # Debug: print all form fields
+    print("📥 Form fields:", dict(form))
+
     message = form.get("Body", "").strip().lower()
     sender = form.get("From", "")
 
