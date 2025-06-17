@@ -1,3 +1,4 @@
+import json
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from twilio.rest import Client
@@ -39,29 +40,35 @@ async def set_appointment(appointment: Appointment):
         return {"status": "success", "message": "Sent to doctor on WhatsApp."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
 @app.post("/whatsapp")
 async def receive_whatsapp(request: Request):
     try:
         form = await request.form()
-        print("📥 Raw Form Data:", dict(form))  # Print all received fields
-
         message = form.get("Body", "").strip().lower()
         sender = form.get("From", "")
 
         print(f"📥 WhatsApp from {sender}: {message}")
 
         if message == "confirm" and sender == DOCTOR_NUMBER:
+            # Send template message to patient
             client.messages.create(
                 from_=TWILIO_FROM,
                 to=PATIENT_NUMBER,
-                body="✅ Doctor confirmed your appointment!"
+                content_sid="HXab609738f233c7e8ce58eb8f85aede97",
+                content_variables=json.dumps({
+                    "1": "Daniyal",         # Patient name
+                    "2": "Dr. Khan",        # Doctor name
+                    "3": "Tuesday",         # Date
+                    "4": "10AM"             # Time
+                })
             )
-            print("✅ Confirmation sent to patient")
+            print("✅ Confirmation sent to patient via WhatsApp Template")
             return {"status": "sent"}
 
         print("❌ Ignored message or wrong sender")
         return {"status": "ignored"}
 
     except Exception as e:
-        print("❌ Error in /whatsapp route:", str(e))  # Debug error
+        print("❌ Error in /whatsapp route:", str(e))
         return {"status": "error", "message": str(e)}

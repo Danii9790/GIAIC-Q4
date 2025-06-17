@@ -1,394 +1,82 @@
-# import streamlit as st
-# import os
-# import json
-# import asyncio
-# from dotenv import load_dotenv
-# from twilio.rest import Client
-# from agents import Agent, Runner, function_tool, OpenAIChatCompletionsModel
-# from openai import AsyncOpenAI
-
-# # Load environment variables
-# load_dotenv()
-
-# # Twilio Sandbox Setup
-# TWILIO_FROM = "whatsapp:+14155238886"
-# DOCTOR_WHATSAPP = "whatsapp:+923173762160"
-# PATIENT_WHATSAPP = "whatsapp:+923196560895"
-# twilio_client = Client(os.getenv("TWILIO_ACC_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
-
-# # Gemini API Setup
-# gemini_api_key = os.getenv("GEMINI_API_KEY")
-# external_client = AsyncOpenAI(
-#     api_key=gemini_api_key,
-#     base_url="https://generativelanguage.googleapis.com/v1beta/"
-# )
-# model = OpenAIChatCompletionsModel(
-#     model="gemini-2.0-flash",
-#     openai_client=external_client
-# )
-
-# # Function Tool: Get available doctors
-# @function_tool
-# def get_doctors() -> dict:
-#     return {
-#         "Dr. Khan": {
-#             "specialty": "Dermatologist",
-#             "availability": {
-#                 "Tuesday": "12PM - 4PM",
-#                 "Thursday": "10AM - 1PM"
-#             }
-#         },
-#         "Dr. Ahmed": {
-#             "specialty": "Neurologist",
-#             "availability": {
-#                 "Monday": "1PM - 5PM",
-#                 "Friday": "10AM - 3PM"
-#             }
-#         }
-#     }
-
-# # Function Tool: Notify doctor for confirmation
-
-# # @function_tool
-# # def send_doctor_request(patient_name: str, doctor_name: str, date: str, time: str) -> str:
-# #     message = (
-# #         f"📢 New Appointment Request:\n"
-# #         f"Patient: {patient_name}\n"
-# #         f"Doctor: {doctor_name}\n"
-# #         f"Date: {date} at {time}\n\n"
-# #         f"👉 Reply with 'confirm' to approve."
-# #     )
-# #     try:
-# #         twilio_client.messages.create(
-# #             from_=TWILIO_FROM,
-# #             to=DOCTOR_WHATSAPP,
-# #             body=message
-# #         )
-# #         return "✅ Request sent to doctor. Waiting for confirmation..."
-# #     except Exception as e:
-# #         return f"❌ Failed to send to doctor: {e}"
-# import requests
-
-# @function_tool
-# def send_doctor_request(patient_name: str, doctor_name: str, date: str, time: str) -> str:
-#     try:
-#         # POST appointment info to your webhook deployed on Vercel
-#         response = requests.post(
-#             "https://giaic-q4.vercel.app/set-appointment",
-#             json={
-#                 "patient_name": patient_name,
-#                 "doctor_name": doctor_name,
-#                 "date": date,
-#                 "time": time
-#             }
-#         )
-
-#         if response.status_code == 200:
-#             return "✅ Appointment request sent to doctor. Awaiting doctor's confirmation..."
-#         else:
-#             return f"❌ Failed to send to webhook. Status code: {response.status_code}"
-#     except Exception as e:
-#         return f"❌ Error sending to webhook: {e}"
-
-# # Function Tool: Notify patient after confirmation
-# @function_tool
-# def confirm_and_notify_patient(patient_name: str, doctor_name: str, date: str, time: str) -> str:
-#     message = (
-#         f"✅ Hello {patient_name}, your appointment with {doctor_name} is confirmed for {date} at {time}."
-#     )
-#     try:
-#         twilio_client.messages.create(
-#             from_=TWILIO_FROM,
-#             to=PATIENT_WHATSAPP,
-#             body=message
-#         )
-#         save_to_json(patient_name, doctor_name, date, time)
-#         return "✅ Confirmation sent to patient and saved."
-#     except Exception as e:
-#         return f"❌ Error notifying patient: {e}"
-
-# # Save to JSON
-# def save_to_json(patient_name, doctor_name, date, time):
-#     file = "patient.json"
-#     record = {
-#         "patient": patient_name,
-#         "doctor": doctor_name,
-#         "date": date,
-#         "time": time
-#     }
-#     if os.path.exists(file):
-#         with open(file, "r") as f:
-#             existing = json.load(f)
-#     else:
-#         existing = []
-#     existing.append(record)
-#     with open(file, "w") as f:
-#         json.dump(existing, f, indent=2)
-
-# # Define the agent
-# agent = Agent(
-#     name="Appointment Agent",
-#     instructions="""
-# You are a helpful assistant for booking doctor appointments.
-
-# 1. Use `get_doctors` to show doctors.
-# 2. Ask user for patient name, doctor, date, and time.
-# 3. Call `send_doctor_request` to notify doctor on WhatsApp.
-# 4. Wait for doctor reply to confirm.
-# 5. Then call `confirm_and_notify_patient` to notify the patient and save data.
-# 6. Always guide the user step-by-step.
-# """,
-#     model=model,
-#     tools=[get_doctors, send_doctor_request]
-# )
-
-# # ---------------- Streamlit UI ----------------
-# st.set_page_config(page_title="DoctorBot", page_icon="🩺")
-# st.title("🩺 Doctor Appointment Assistant")
-# st.markdown("Chat with the assistant to book appointments and get WhatsApp confirmations!")
-
-# if "chat" not in st.session_state:
-#     st.session_state.chat = []
-
-# user_msg = st.text_input("🧑‍💬 You:", key="user_input")
-
-# if user_msg:
-#     st.session_state.chat.append({"role": "user", "content": user_msg})
-#     with st.spinner("💬 Assistant is typing..."):
-#         loop = asyncio.new_event_loop()
-#         asyncio.set_event_loop(loop)
-#         result = loop.run_until_complete(Runner.run(agent, input=st.session_state.chat))
-#         assistant_reply = result.final_output
-#         st.session_state.chat.append({"role": "assistant", "content": assistant_reply})
-#         st.markdown(f"🤖 **Bot:** {assistant_reply}")
-
-# # Show full chat
-# with st.expander("📜 Chat History"):
-#     for msg in st.session_state.chat:
-#         st.markdown(f"**{msg['role'].capitalize()}**: {msg['content']}")
-
-
-# import streamlit as st
-# import os
-# import json
-# import asyncio
-# import requests
-# from dotenv import load_dotenv
-# from twilio.rest import Client
-# from agents import Agent, Runner, function_tool, OpenAIChatCompletionsModel
-# from openai import AsyncOpenAI
-
-# # -------------------- Environment Setup --------------------
-# load_dotenv()
-
-# # Twilio Setup
-# TWILIO_FROM = "whatsapp:+14155238886"
-# twilio_client = Client(os.getenv("TWILIO_ACC_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
-
-# # Gemini Model Setup
-# gemini_api_key = os.getenv("GEMINI_API_KEY")
-# external_client = AsyncOpenAI(
-#     api_key=gemini_api_key,
-#     base_url="https://generativelanguage.googleapis.com/v1beta/"
-# )
-# model = OpenAIChatCompletionsModel(
-#     model="gemini-2.0-flash",
-#     openai_client=external_client
-# )
-
-# # -------------------- Function Tools --------------------
-
-# @function_tool
-# def get_doctors() -> dict:
-#     """Returns available doctors with their specialties and timings."""
-#     return {
-#         "Dr. Khan": {
-#             "specialty": "Dermatologist",
-#             "availability": {
-#                 "Tuesday": "12PM - 4PM",
-#                 "Thursday": "10AM - 1PM"
-#             }
-#         },
-#         "Dr. Ahmed": {
-#             "specialty": "Neurologist",
-#             "availability": {
-#                 "Monday": "1PM - 5PM",
-#                 "Friday": "10AM - 3PM"
-#             }
-#         }
-#     }
-# @function_tool
-# def send_doctor_request(patient_name: str, doctor_name: str, date: str, time: str) -> str:
-#     """Send appointment request to webhook for notifying the doctor."""
-#     try:
-#         payload = {
-#             "patient_name": patient_name,
-#             "doctor_name": doctor_name,
-#             "date": date,
-#             "time": time
-#         }
-
-#         response = requests.post(
-#             "https://giaic-q4-6mrj97ox4-muhammad-daniyals-projects-496f954f.vercel.app/set-appointment",
-#             headers={"Content-Type": "application/json"},
-#             json=payload
-#         )
-
-#         if response.status_code == 200:
-#             return "✅ Appointment request sent to doctor successfully. Waiting for their confirmation on WhatsApp..."
-#         else:
-#             return f"❌ Failed to send request. Server responded with status code {response.status_code}: {response.text}"
-#     except Exception as e:
-#         return f"❌ Error sending appointment request to webhook: {str(e)}"
-
-
-# @function_tool
-# def confirm_and_notify_patient(patient_name: str, doctor_name: str, date: str, time: str) -> str:
-#     """Sends WhatsApp confirmation to the patient and logs it locally."""
-#     try:
-#         message = (
-#             f"✅ Hello {patient_name}, your appointment with {doctor_name} is confirmed for {date} at {time}."
-#         )
-#         twilio_client.messages.create(
-#             from_=TWILIO_FROM,
-#             to="whatsapp:+923196560895",  # Replace with actual patient number
-#             body=message
-#         )
-#         save_to_json(patient_name, doctor_name, date, time)
-#         return "✅ Patient notified and appointment saved."
-#     except Exception as e:
-#         return f"❌ Failed to notify patient: {e}"
-
-# def save_to_json(patient_name, doctor_name, date, time):
-#     """Stores appointment data in local JSON file."""
-#     record = {
-#         "patient": patient_name,
-#         "doctor": doctor_name,
-#         "date": date,
-#         "time": time
-#     }
-#     file = "appointments.json"
-#     try:
-#         if os.path.exists(file):
-#             with open(file, "r") as f:
-#                 data = json.load(f)
-#         else:
-#             data = []
-#         data.append(record)
-#         with open(file, "w") as f:
-#             json.dump(data, f, indent=2)
-#     except Exception as e:
-#         print(f"Error saving JSON: {e}")
-
-# # -------------------- Agent Setup --------------------
-# agent = Agent(
-#     name="DoctorBot",
-#     instructions="""
-# You are DoctorBot, a helpful and polite assistant that helps users book appointments with doctors via WhatsApp.
-
-# Follow these steps strictly:
-
-# 1. When the user starts, call `get_doctors` to show all available doctors and their timings.
-# 2. Ask for:
-#    - Patient's full name
-#    - Desired doctor's name (match exactly from the list)
-#    - Appointment date
-#    - Preferred time
-# 3. Call `send_doctor_request` to notify the doctor about the request via a webhook or vercel api.
-# 4. Instruct the user to wait for confirmation from the doctor via WhatsApp. 
-#    (This will be sent through an external system like Twilio or CallMeBot.)
-# 5. Once the webhook confirms that the doctor approved, call `confirm_and_notify_patient`
-#    to send a final WhatsApp confirmation to the patient.
-# 6. Be clear, polite, and step-by-step in your replies. Avoid repeating the same tool unless needed.
-# call the vercel api 
-
-# Note: Try your best to help the user complete the appointment successfully, and always assume the WhatsApp confirmation is an important final step.
-# """,
-#     model=model,
-#     tools=[get_doctors, send_doctor_request, confirm_and_notify_patient]
-# )
-
-# # -------------------- Streamlit UI --------------------
-
-# st.set_page_config(page_title="DoctorBot", page_icon="🩺")
-# st.title("🩺 Doctor Appointment Assistant")
-# st.markdown("Use this assistant to book doctor appointments and get confirmations via WhatsApp.")
-
-# if "chat" not in st.session_state:
-#     st.session_state.chat = []
-
-# user_msg = st.text_input("🧑‍💬 You:", key="user_input")
-
-# if user_msg:
-#     st.session_state.chat.append({"role": "user", "content": user_msg})
-#     with st.spinner("🤖 DoctorBot is replying..."):
-#         loop = asyncio.new_event_loop()
-#         asyncio.set_event_loop(loop)
-#         result = loop.run_until_complete(Runner.run(agent, input=st.session_state.chat))
-#         bot_reply = result.final_output
-#         st.session_state.chat.append({"role": "assistant", "content": bot_reply})
-#         st.markdown(f"**🤖 Bot:** {bot_reply}")
-
-# # Show chat history
-# with st.expander("📜 Chat History"):
-#     for msg in st.session_state.chat:
-#         role_icon = "🧑" if msg["role"] == "user" else "🤖"
-#         st.markdown(f"**{role_icon} {msg['role'].capitalize()}**: {msg['content']}")
-
-
 import streamlit as st
+import asyncio
 import os
 import json
-import asyncio
 import requests
 from dotenv import load_dotenv
-from twilio.rest import Client
 from agents import Agent, Runner, function_tool, OpenAIChatCompletionsModel
 from openai import AsyncOpenAI
 
-# -------------------- Environment Setup --------------------
+# -------------------- Load Environment --------------------
 load_dotenv()
 
-# Twilio Setup
-TWILIO_FROM = "whatsapp:+14155238886"
-twilio_client = Client(os.getenv("TWILIO_ACC_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
+# Twilio / Webhook constants
+VERCEL_WEBHOOK_URL = "https://giaic-q4.vercel.app/set-appointment"
 
-# Gemini Model Setup
+TWILIO_FROM = "whatsapp:+14155238886"
+PATIENT_NUMBER = "whatsapp:+923196560895"
+
+# Gemini / OpenAI Model Setup
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 external_client = AsyncOpenAI(
     api_key=gemini_api_key,
     base_url="https://generativelanguage.googleapis.com/v1beta/"
 )
-model = OpenAIChatCompletionsModel(
-    model="gemini-2.0-flash",
-    openai_client=external_client
-)
+model = OpenAIChatCompletionsModel(model="gemini-1.5-flash", openai_client=external_client)
 
 # -------------------- Function Tools --------------------
-
 @function_tool
 def get_doctors() -> dict:
-    """Returns available doctors with their specialties and timings."""
+    """
+    Returns a dictionary of available doctors along with their specialties and weekly availability schedule.
+
+    This tool is used by the agent to:
+    - Show the list of doctors
+    - Match doctor names from user input
+    - Provide exact availability (days and time ranges)
+    - Validate appointment scheduling requests
+
+    Doctors Available:
+    ------------------
+    1. Dr. Khan (Dermatologist)
+       - Available: Monday to Friday
+           • Morning: 10:00 AM – 2:00 PM
+           • Evening: 7:00 PM – 10:00 PM
+
+    2. Dr. Ahmed (Neurologist)
+       - Available: Monday to Friday
+           • Evening: 7:00 PM – 11:00 PM
+       - Saturday:
+           • Morning: 10:00 AM – 2:00 PM
+           • Evening: 7:00 PM – 11:00 PM
+    """
     return {
         "Dr. Khan": {
             "specialty": "Dermatologist",
             "availability": {
-                "Tuesday": "12PM - 4PM",
-                "Thursday": "10AM - 1PM"
+                "Monday to Friday": {
+                    "Morning": "10:00 AM - 2:00 PM",
+                    "Evening": "7:00 PM - 10:00 PM"
+                }
             }
         },
         "Dr. Ahmed": {
             "specialty": "Neurologist",
             "availability": {
-                "Monday": "1PM - 5PM",
-                "Friday": "10AM - 3PM"
+                "Monday to Friday": {
+                    "Evening": "7:00 PM - 11:00 PM"
+                },
+                "Saturday": {
+                    "Morning": "10:00 AM - 2:00 PM",
+                    "Evening": "7:00 PM - 11:00 PM"
+                }
             }
         }
     }
 
+
 @function_tool
 def send_doctor_request(patient_name: str, doctor_name: str, date: str, time: str) -> str:
-    """Send appointment request to webhook for notifying the doctor."""
     try:
         payload = {
             "patient_name": patient_name,
@@ -396,119 +84,122 @@ def send_doctor_request(patient_name: str, doctor_name: str, date: str, time: st
             "date": date,
             "time": time
         }
-
         response = requests.post(
-            "https://giaic-q4.vercel.app/set-appointment",
+            VERCEL_WEBHOOK_URL,
             headers={"Content-Type": "application/json"},
             json=payload
         )
-
         if response.status_code == 200:
-            return "✅ Appointment request sent to doctor successfully."
+            return "✅ Doctor notified via webhook!"
         else:
-            return f"❌ Failed to send request. Status code {response.status_code}: {response.text}"
+            return f"❌ Doctor notification failed (status code {response.status_code})"
     except Exception as e:
-        return f"❌ Error sending request to webhook: {str(e)}"
+        return f"❌ Webhook error: {str(e)}"
 
 @function_tool
-def confirm_and_notify_patient(patient_name: str, doctor_name: str, date: str, time: str) -> str:
-    """Sends WhatsApp confirmation to the patient and logs it locally."""
+def confirm_patient(patient_name: str, doctor_name: str, date: str, time: str) -> str:
     try:
-        message = (
-            f"✅ Hello {patient_name}, your appointment with {doctor_name} is confirmed for {date} at {time}."
-        )
-        twilio_client.messages.create(
-            from_=TWILIO_FROM,
-            to="whatsapp:+923196560895",  # Replace with actual dynamic number if needed
-            body=message
-        )
+        message = f"✅ Hello {patient_name}, your appointment with {doctor_name} is confirmed on {date} at {time}."
+        # NOTE: Twilio sending is now handled via webhook/confirmation logic
         save_to_json(patient_name, doctor_name, date, time)
-        return "✅ Patient notified and appointment saved."
+        return "✅ Patient notified via WhatsApp (via webhook confirmation)."
     except Exception as e:
         return f"❌ Failed to notify patient: {e}"
 
 def save_to_json(patient_name, doctor_name, date, time):
-    """Stores appointment data in local JSON file."""
-    record = {
-        "patient": patient_name,
-        "doctor": doctor_name,
-        "date": date,
-        "time": time
-    }
+    record = {"patient": patient_name, "doctor": doctor_name, "date": date, "time": time}
     file = "appointments.json"
     try:
-        if os.path.exists(file):
-            with open(file, "r") as f:
-                data = json.load(f)
-        else:
-            data = []
+        data = json.load(open(file)) if os.path.exists(file) else []
         data.append(record)
         with open(file, "w") as f:
             json.dump(data, f, indent=2)
     except Exception as e:
-        print(f"Error saving JSON: {e}")
+        print(f"JSON save error: {e}")
 
-# -------------------- Sub Agents --------------------
+# -------------------- Agents --------------------
 
-info_collector_agent = Agent(
-    name="InfoCollectorAgent",
+
+
+
+agent = Agent(
+    name="Doctor Assistant",
     instructions="""
-Collect the patient's full name, doctor's name, date, and time for appointment.
-Ensure doctor exists from the list using `get_doctors`.
-Return all data clearly as JSON with keys: patient_name, doctor_name, date, time.
+You are a smart doctor appointment assistant.
+
+Your responsibilities are:
+
+🩺 1. **Doctor Availability**:  
+If the user asks about available doctors or any doctor's schedule, use the `get_doctors` tool to fetch the list of doctors, their specialties, and their availability. Always verify that the doctor exists before proceeding.
+
+📅 2. **Collect Appointment Details**:  
+Ask the user to provide the following details:
+- Patient's full name
+- Doctor's name (must exist in get_doctors)
+- Appointment date (should match the doctor's available days)
+- Appointment time (should fall within the doctor's available time range)
+
+✅ 3. **Confirm Appointment**:  
+Once you have all details:
+- Call `send_doctor_request` to notify the doctor (via webhook)
+- Call `confirm_patient` to save and simulate notifying the patient
+
+🧾 Format for internal tracking:
+Return success or failure messages clearly, such as:
+- “✅ Appointment booked successfully.”
+- “❌ Doctor not available at this time.”
+- “❌ Patient confirmation failed.”
+
+Never guess availability — always use `get_doctors` tool when needed.
 """,
     model=model,
-    tools=[get_doctors]
+    tools=[get_doctors, confirm_patient, send_doctor_request]
 )
 
-appointment_agent = Agent(
-    name="AppointmentAgent",
-    instructions="""
-Take the collected info and:
-1. Call `send_doctor_request` to notify doctor via webhook.
-2. Then call `confirm_and_notify_patient` to send WhatsApp confirmation.
-Return status after each step.
-""",
-    model=model,
-    tools=[send_doctor_request, confirm_and_notify_patient]
-)
-
-# -------------------- Coordinator Agent --------------------
-
-coordinator_agent = Agent(
-    name="CoordinatorAgent",
-    instructions="""
-You are DoctorBot, the main coordinator.
-First, hand off to InfoCollectorAgent to collect appointment details.
-Then pass the data to AppointmentAgent to finalize the appointment and notify the patient.
-""",
-    model=model,
-    handoffs=[info_collector_agent, appointment_agent]
-)
 
 # -------------------- Streamlit UI --------------------
 
+# Page config
 st.set_page_config(page_title="DoctorBot", page_icon="🩺")
 st.title("🩺 Doctor Appointment Assistant")
-st.markdown("Use this assistant to book doctor appointments and get confirmations via WhatsApp.")
+st.markdown("Book appointments and get WhatsApp confirmation.")
 
+# Session state setup
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
-user_msg = st.text_input("🧑‍💬 You:", key="user_input")
+# Layout
+st.divider()
+st.markdown("### 💬 Start Chatting with DoctorBot")
 
-if user_msg:
+# Text input with form to auto-clear field
+with st.form("chat_form", clear_on_submit=True):
+    user_msg = st.text_input("Type your question or request here:", key="user_input", placeholder="e.g. Book me with Dr. Khan on Monday morning...")
+    submit = st.form_submit_button("Send")
+
+# If message is sent
+if submit and user_msg:
     st.session_state.chat.append({"role": "user", "content": user_msg})
-    with st.spinner("🤖 DoctorBot is replying..."):
+    
+    with st.spinner("🤖 Thinking..."):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        result = loop.run_until_complete(Runner.run(coordinator_agent, input=st.session_state.chat))
+        result = loop.run_until_complete(
+            Runner.run(agent, input=st.session_state.chat)
+        )
         bot_reply = result.final_output
-        st.session_state.chat.append({"role": "assistant", "content": bot_reply})
-        st.markdown(f"**🤖 Bot:** {bot_reply}")
 
-# Show chat history
-with st.expander("📜 Chat History"):
+        st.session_state.chat.append({"role": "assistant", "content": bot_reply})
+        st.success("✅ Response received!")
+
+# Chat history viewer
+st.divider()
+with st.expander("📜 Chat History", expanded=True):
     for msg in st.session_state.chat:
-        role_icon = "🧑" if msg["role"] == "user" else "🤖"
-        st.markdown(f"**{role_icon} {msg['role'].capitalize()}**: {msg['content']}")
+        icon = "🧑" if msg["role"] == "user" else "🤖"
+        st.markdown(f"**{icon} {msg['role'].capitalize()}**: {msg['content']}")
+
+# Optional: Reset button to clear chat
+if st.button("🗑️ Clear Chat"):
+    st.session_state.chat = []
+    st.experimental_rerun()
