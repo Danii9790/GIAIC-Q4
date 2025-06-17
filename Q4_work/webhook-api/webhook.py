@@ -1,4 +1,3 @@
-import json
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from twilio.rest import Client
@@ -40,35 +39,32 @@ async def set_appointment(appointment: Appointment):
         return {"status": "success", "message": "Sent to doctor on WhatsApp."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    
+
 
 @app.post("/whatsapp")
-async def receive_whatsapp(request: Request):
+async def receive_whatsapp(request: Request,appointment: Appointment):
     try:
         form = await request.form()
+        print("📥 Raw Form Data:", dict(form))  # Print all received fields
+
         message = form.get("Body", "").strip().lower()
         sender = form.get("From", "")
 
         print(f"📥 WhatsApp from {sender}: {message}")
 
         if message == "confirm" and sender == DOCTOR_NUMBER:
-            # ✅ Use WhatsApp Template Message
             client.messages.create(
-                from_="whatsapp:+14155238886",  # Twilio Sandbox
+                from_=TWILIO_FROM,
                 to=PATIENT_NUMBER,
-                content_sid="HX860bd85736336b3bcffc4dfb3c3ac7df",
-                content_variables=json.dumps({
-                    "1": "Daniyal",         # 👤 Patient name
-                    "2": "Dr. Ahmed",       # 🧑‍⚕️ Doctor name
-                    "3": "Wednesday",       # 📅 Date
-                    "4": "7PM"              # ⏰ Time
-                })
+                body=f"Dear : {appointment.patient_name} your appointment with Dr.{appointment.doctor_name} Date : {appointment.date} , Time : {appointment.time} has been confirmed ✅. If you have futher queries contact with Dr Assistant whatsapp number : +923173762160 "
             )
-            print("✅ WhatsApp template sent to patient successfully")
+            print("✅ Confirmation sent to patient")
             return {"status": "sent"}
 
-        print("❌ Message ignored or sender mismatch")
+        print("❌ Ignored message or wrong sender")
         return {"status": "ignored"}
 
     except Exception as e:
-        print("❌ Error in /whatsapp route:", str(e))
+        print("❌ Error in /whatsapp route:", str(e))  # Debug error
         return {"status": "error", "message": str(e)}
