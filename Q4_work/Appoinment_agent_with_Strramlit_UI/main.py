@@ -157,49 +157,59 @@ Never guess availability — always use `get_doctors` tool when needed.
 )
 
 
-# -------------------- Streamlit UI --------------------
 
-# Page config
-st.set_page_config(page_title="DoctorBot", page_icon="🩺")
-st.title("🩺 Doctor Appointment Assistant")
-st.markdown("Book appointments and get WhatsApp confirmation.")
+# Page Configuration
+st.set_page_config(page_title="DoctorBot 🤖", page_icon="🩺", layout="centered")
 
-# Session state setup
+# Title and subtitle
+st.markdown("<h1 style='text-align: center;'>🩺 DoctorBot</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Your assistant for booking doctor appointments via WhatsApp</p>", unsafe_allow_html=True)
+st.markdown("---")
+
+# Initialize chat state
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
-# Layout
-st.divider()
-st.markdown("### 💬 Start Chatting with DoctorBot")
+# Chat Container (Better Visual Separation)
+st.markdown("### 💬 Chat with DoctorBot")
 
-# Text input with form to auto-clear field
+# Input Field with Auto-Clear Form
 with st.form("chat_form", clear_on_submit=True):
-    user_msg = st.text_input("Type your question or request here:", key="user_input", placeholder="e.g. Book me with Dr. Khan on Monday morning...")
-    submit = st.form_submit_button("Send")
+    user_msg = st.text_input(
+        label="Type your message below:",
+        placeholder="e.g., Book me with Dr. Ahmed on Friday evening...",
+        key="user_input"
+    )
+    submitted = st.form_submit_button("💬 Send")
 
-# If message is sent
-if submit and user_msg:
+# Process the input
+if submitted and user_msg:
     st.session_state.chat.append({"role": "user", "content": user_msg})
     
-    with st.spinner("🤖 Thinking..."):
+    with st.spinner("🤖 DoctorBot is replying..."):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         result = loop.run_until_complete(
             Runner.run(agent, input=st.session_state.chat)
         )
-        bot_reply = result.final_output
+        reply = result.final_output
+        st.session_state.chat.append({"role": "assistant", "content": reply})
+        st.success("✅ Message received and processed!")
 
-        st.session_state.chat.append({"role": "assistant", "content": bot_reply})
-        st.success("✅ Response received!")
+# Display Chat History
+with st.container():
+    for msg in reversed(st.session_state.chat):  # Recent messages on top
+        if msg["role"] == "user":
+            st.markdown(
+                f"<div style='background-color:#f1f1f1;padding:10px;border-radius:10px;margin-bottom:5px'><b>🧑 You:</b><br>{msg['content']}</div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f"<div style='background-color:#e6f7ff;padding:10px;border-radius:10px;margin-bottom:10px'><b>🤖 DoctorBot:</b><br>{msg['content']}</div>",
+                unsafe_allow_html=True
+            )
 
-# Chat history viewer
-st.divider()
-with st.expander("📜 Chat History", expanded=True):
-    for msg in st.session_state.chat:
-        icon = "🧑" if msg["role"] == "user" else "🤖"
-        st.markdown(f"**{icon} {msg['role'].capitalize()}**: {msg['content']}")
-
-# Optional: Reset button to clear chat
-if st.button("🗑️ Clear Chat"):
-    st.session_state.chat = []
-    st.experimental_rerun()
+# Footer
+st.markdown("---")
+st.markdown("<p style='text-align: center; font-size: small;'>Powered by OpenAI, Streamlit, and Twilio WhatsApp</p>", unsafe_allow_html=True)

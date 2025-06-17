@@ -82,5 +82,11 @@
     "doctor": "Dr. Khan",
     "date": "Friday",
     "time": "11:00 AM"
+  },
+  {
+    "patient": "Afzal",
+    "doctor": "Dr. Khan",
+    "date": "Friday",
+    "time": "7:00 PM"
   }
 ]

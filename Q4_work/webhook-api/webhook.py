@@ -43,28 +43,28 @@ async def set_appointment(appointment: Appointment):
 
 
 @app.post("/whatsapp")
-async def receive_whatsapp(request: Request,appointment: Appointment):
+async def receive_whatsapp(request: Request):
     try:
         form = await request.form()
-        print("📥 Raw Form Data:", dict(form))  # Print all received fields
+        print("📥 Raw Form Data:", dict(form))  # Full data from Twilio
 
         message = form.get("Body", "").strip().lower()
         sender = form.get("From", "")
 
-        print(f"📥 WhatsApp from {sender}: {message}")
+        print(f"📥 Message from: {sender}, Content: {message}")
 
         if message == "confirm" and sender == DOCTOR_NUMBER:
             client.messages.create(
                 from_=TWILIO_FROM,
                 to=PATIENT_NUMBER,
-                body=f"Dear : {appointment.patient_name} your appointment with Dr.{appointment.doctor_name} Date : {appointment.date} , Time : {appointment.time} has been confirmed ✅. If you have futher queries contact with Dr Assistant whatsapp number : +923173762160 "
+                body="✅ Doctor confirmed your appointment!"
             )
-            print("✅ Confirmation sent to patient")
+            print("✅ Message sent to patient")
             return {"status": "sent"}
 
-        print("❌ Ignored message or wrong sender")
+        print("❌ Message ignored or unauthorized sender")
         return {"status": "ignored"}
 
     except Exception as e:
-        print("❌ Error in /whatsapp route:", str(e))  # Debug error
+        print("❌ Error in /whatsapp route:", str(e))
         return {"status": "error", "message": str(e)}
