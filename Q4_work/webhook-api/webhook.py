@@ -51,22 +51,22 @@ async def receive_whatsapp(request: Request):
         print(f"📥 WhatsApp from {sender}: {message}")
 
         if message == "confirm" and sender == DOCTOR_NUMBER:
-            # Send template message to patient
+            # ✅ Use WhatsApp Template Message
             client.messages.create(
-                from_=TWILIO_FROM,
+                from_="whatsapp:+14155238886",  # Twilio Sandbox
                 to=PATIENT_NUMBER,
-                content_sid="HXab609738f233c7e8ce58eb8f85aede97",
+                content_sid="HX860bd85736336b3bcffc4dfb3c3ac7df",
                 content_variables=json.dumps({
-                    "1": "Daniyal",         # Patient name
-                    "2": "Dr. Khan",        # Doctor name
-                    "3": "Tuesday",         # Date
-                    "4": "10AM"             # Time
+                    "1": "Daniyal",         # 👤 Patient name
+                    "2": "Dr. Ahmed",       # 🧑‍⚕️ Doctor name
+                    "3": "Wednesday",       # 📅 Date
+                    "4": "7PM"              # ⏰ Time
                 })
             )
-            print("✅ Confirmation sent to patient via WhatsApp Template")
+            print("✅ WhatsApp template sent to patient successfully")
             return {"status": "sent"}
 
-        print("❌ Ignored message or wrong sender")
+        print("❌ Message ignored or sender mismatch")
         return {"status": "ignored"}
 
     except Exception as e:
