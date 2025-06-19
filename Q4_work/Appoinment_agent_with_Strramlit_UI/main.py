@@ -158,58 +158,88 @@ Never guess availability — always use `get_doctors` tool when needed.
 
 
 
-# Page Configuration
-st.set_page_config(page_title="DoctorBot 🤖", page_icon="🩺", layout="centered")
+# # Page Configuration
+# st.set_page_config(page_title="DoctorBot 🤖", page_icon="🩺", layout="centered")
 
-# Title and subtitle
-st.markdown("<h1 style='text-align: center;'>🩺 DoctorBot</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Your assistant for booking doctor appointments via WhatsApp</p>", unsafe_allow_html=True)
-st.markdown("---")
+# # Title and subtitle
+# st.markdown("<h1 style='text-align: center;'>🩺 DoctorBot</h1>", unsafe_allow_html=True)
+# st.markdown("<p style='text-align: center;'>Your assistant for booking doctor appointments via WhatsApp</p>", unsafe_allow_html=True)
+# st.markdown("---")
 
-# Initialize chat state
-if "chat" not in st.session_state:
-    st.session_state.chat = []
+# # Initialize chat state
+# if "chat" not in st.session_state:
+#     st.session_state.chat = []
 
-# Chat Container (Better Visual Separation)
-st.markdown("### 💬 Chat with DoctorBot")
+# # Chat Container (Better Visual Separation)
+# st.markdown("### 💬 Chat with DoctorBot")
 
-# Input Field with Auto-Clear Form
-with st.form("chat_form", clear_on_submit=True):
-    user_msg = st.text_input(
-        label="Type your message below:",
-        placeholder="e.g., Book me with Dr. Ahmed on Friday evening...",
-        key="user_input"
-    )
-    submitted = st.form_submit_button("💬 Send")
+# # Input Field with Auto-Clear Form
+# with st.form("chat_form", clear_on_submit=True):
+#     user_msg = st.text_input(
+#         label="Type your message below:",
+#         placeholder="e.g., Book me with Dr. Ahmed on Friday evening...",
+#         key="user_input"
+#     )
+#     submitted = st.form_submit_button("💬 Send")
 
-# Process the input
-if submitted and user_msg:
-    st.session_state.chat.append({"role": "user", "content": user_msg})
+# # Process the input
+# if submitted and user_msg:
+#     st.session_state.chat.append({"role": "user", "content": user_msg})
     
-    with st.spinner("🤖 DoctorBot is replying..."):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        result = loop.run_until_complete(
-            Runner.run(agent, input=st.session_state.chat)
-        )
-        reply = result.final_output
-        st.session_state.chat.append({"role": "assistant", "content": reply})
-        st.success("✅ Message received and processed!")
+#     with st.spinner("🤖 DoctorBot is replying..."):
+#         loop = asyncio.new_event_loop()
+#         asyncio.set_event_loop(loop)
+#         result = loop.run_until_complete(
+#             Runner.run(agent, input=st.session_state.chat)
+#         )
+#         reply = result.final_output
+#         st.session_state.chat.append({"role": "assistant", "content": reply})
+#         st.success("✅ Message received and processed!")
 
-# Display Chat History
-with st.container():
-    for msg in reversed(st.session_state.chat):  # Recent messages on top
-        if msg["role"] == "user":
-            st.markdown(
-                f"<div style='background-color:#f1f1f1;padding:10px;border-radius:10px;margin-bottom:5px'><b>🧑 You:</b><br>{msg['content']}</div>",
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                f"<div style='background-color:#e6f7ff;padding:10px;border-radius:10px;margin-bottom:10px'><b>🤖 DoctorBot:</b><br>{msg['content']}</div>",
-                unsafe_allow_html=True
-            )
+# # Display Chat History
+# with st.container():
+#     for msg in reversed(st.session_state.chat):  # Recent messages on top
+#         if msg["role"] == "user":
+#             st.markdown(
+#                 f"<div style='background-color:#f1f1f1;padding:10px;border-radius:10px;margin-bottom:5px'><b>🧑 You:</b><br>{msg['content']}</div>",
+#                 unsafe_allow_html=True
+#             )
+#         else:
+#             st.markdown(
+#                 f"<div style='background-color:#e6f7ff;padding:10px;border-radius:10px;margin-bottom:10px'><b>🤖 DoctorBot:</b><br>{msg['content']}</div>",
+#                 unsafe_allow_html=True
+#             )
 
-# Footer
-st.markdown("---")
-st.markdown("<p style='text-align: center; font-size: small;'>Powered by OpenAI, Streamlit, and Twilio WhatsApp</p>", unsafe_allow_html=True)
+# # Footer
+# st.markdown("---")
+# st.markdown("<p style='text-align: center; font-size: small;'>Powered by OpenAI, Streamlit, and Twilio WhatsApp</p>", unsafe_allow_html=True)
+
+
+async def get_response(user_input: str) -> str:
+    run_result = await Runner.run(agent, user_input)
+    return run_result.final_output
+
+# -------------------- Streamlit UI --------------------
+st.set_page_config(page_title="Doctor Appointment Assistant", page_icon="🩺")
+st.title("🩺 Doctor Appointment Assistant")
+st.markdown("This assistant helps you find a doctor and book an appointment via WhatsApp using Twilio.")
+
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+user_input = st.chat_input("Ask about doctor availability or book an appointment...")
+
+for user_msg, assistant_msg in st.session_state.history:
+    with st.chat_message("user"): st.markdown(user_msg)
+    with st.chat_message("assistant"): st.markdown(assistant_msg)
+
+if user_input:
+    st.session_state.history.append((user_input, "thinking..."))
+    st.rerun()
+
+if st.session_state.history and st.session_state.history[-1][1] == "thinking...":
+    last_user_message = st.session_state.history[-1][0]
+    with st.spinner("Thinking..."):
+        response = asyncio.run(get_response(last_user_message))
+    st.session_state.history[-1] = (last_user_message, response)
+    st.rerun()
