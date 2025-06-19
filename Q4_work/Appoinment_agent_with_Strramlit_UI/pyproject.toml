@@ -1,7 +1,14 @@
 [project]
-name = "appoinment-agent-with-strramlit-ui"
+name = "appointment-agent-with-streamlit-ui"
 version = "0.1.0"
-description = "Add your description here"
+description = "Doctor appointment assistant built with Streamlit, OpenAI agents, and Twilio"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+
+dependencies = [
+    "streamlit>=1.35.0",
+    "requests>=2.31.0",
+    "openai>=1.30.1",
+    "python-dotenv>=1.1.0",
+    "agents>=0.1.0",  # Replace with correct version if known
+]
