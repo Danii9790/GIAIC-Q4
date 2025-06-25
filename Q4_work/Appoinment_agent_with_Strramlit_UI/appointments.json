@@ -94,5 +94,17 @@
     "doctor": "Dr. Khan",
     "date": "Monday",
     "time": "10 AM"
+  },
+  {
+    "patient": "Daniyal",
+    "doctor": "Dr. Khan",
+    "date": "Monday",
+    "time": "10:00 AM"
+  },
+  {
+    "patient": "m.daniyal",
+    "doctor": "Dr. Khan",
+    "date": "Monday",
+    "time": "10:00 AM"
   }
 ]
