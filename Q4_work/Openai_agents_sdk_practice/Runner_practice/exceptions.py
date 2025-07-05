@@ -46,7 +46,9 @@ agent = Agent(
 try:
     # Try a normal run (this will work fine unless the model misbehaves)
     result = Runner.run_sync(agent, "Tell me a story about a cat who codes.",run_config=config)
+    # For testing Raise a Error
     raise AgentsException("Inalvid sdk error")
+    # Final Response
     print("Final Output:", result.final_output)
 
 except MaxTurnsExceeded:
