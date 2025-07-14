@@ -85,6 +85,7 @@ user_context_agent = Agent[UserContext](
     For pro users, offer more detailed information and premium suggestions.
     """,
     tools=[get_user_info, get_purchase_history, get_personalized_greeting],
+    model = model
 )
 
 async def main():    
