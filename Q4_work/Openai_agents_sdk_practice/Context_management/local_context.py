@@ -45,6 +45,7 @@ async def main():
         name = "Assistant",
         instructions="You are a helpful Agent . Always use fetch_user-info Tool and only response exactly what the tool returns.",
         tools=[fetch_user_info]
+        
     )
     result = await Runner.run(agent,"what is the user id,name,age?",context=user_info_obj,run_config=config)
 
