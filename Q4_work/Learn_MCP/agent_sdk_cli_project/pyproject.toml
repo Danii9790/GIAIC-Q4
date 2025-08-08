@@ -1,0 +1,14 @@
+[project]
+name = "agent-sdk-cli-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dotenv>=0.9.9",
+    "mcp>=1.12.3",
+    "openai-agents>=0.2.4",
+    "prompt-toolkit>=3.0.51",
+    "rich>=14.1.0",
+    "uvicorn>=0.35.0",
+]
