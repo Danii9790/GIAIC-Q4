@@ -1,6 +1,10 @@
 from mcp.server.fastmcp import FastMCP
 
-mcp_app = FastMCP(name="MCP CLIENT", stateless_http = True)
+mcp = FastMCP(name="MCP CLIENT", stateless_http = True)
+
+@mcp.tool()
+def hello(name:str):
+    return f"Hello {name}!"
 
 
-mcp_server = mcp_app.streamable_http_app()
+mcp_server = mcp.streamable_http_app()
