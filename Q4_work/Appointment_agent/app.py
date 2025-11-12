@@ -159,6 +159,10 @@ import requests
 import asyncio
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
+import pandas as pd
+import kagglehub
+from kagglehub import KaggleDatasetAdapter
+
 
 import streamlit as st
 os.makedirs(os.path.expanduser('~/.streamlit'), exist_ok=True)

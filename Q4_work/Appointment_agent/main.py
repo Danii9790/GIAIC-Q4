@@ -7,6 +7,10 @@ from dotenv import load_dotenv
 from agents import Agent, Runner, function_tool, OpenAIChatCompletionsModel
 from openai import AsyncOpenAI
 from typing import Dict, List
+import pandas as pd
+import kagglehub
+from kagglehub import KaggleDatasetAdapter
+
 
 # Configure Streamlit
 os.makedirs(os.path.expanduser('~/.streamlit'), exist_ok=True)
@@ -71,29 +75,178 @@ def save_appointment(patientName: str, email: str, doctorName: str, date: str, t
     return "✅ Appointment saved to Sanity." if response.status_code == 200 else "❌ Sanity save failed."
 
 # 🧠 Doctor Data
+
 @function_tool
 def get_doctors() -> Dict:
-    return {
-        "Dr. Khan": {
-            "specialty": "Dermatologist",
-            "availability": {
-                "Monday to Friday": {
-                    "Morning": "10:00 AM - 2:00 PM",
-                    "Evening": "7:00 PM - 10:00 PM"
+    try:
+        print("Attempting to load doctors dataset from Kaggle...")
+        file_path = "doctors-in-pakistan-dataset.csv"
+        df = kagglehub.load_dataset(
+            KaggleDatasetAdapter.PANDAS,
+            "riyanmujahid/doctors-in-pakistan-dataset",
+            file_path
+        )
+
+        print(f"Dataset loaded successfully with {len(df)} records")
+        print(f"Available columns: {df.columns.tolist()}")
+
+        doctors_data = {}
+
+        # Convert the DataFrame to dictionary format
+        for _, row in df.iterrows():
+            name = row.get("Name", "Unknown Doctor")
+            specialty = row.get("Specialization", "General")
+            city = row.get("City", "Unknown")
+
+            doctors_data[name] = {
+                "specialty": specialty,
+                "city": city,
+                "availability": {
+                    "Monday to Friday": {
+                        "Morning": "10:00 AM - 2:00 PM",
+                        "Evening": "7:00 PM - 10:00 PM"
+                    }
                 }
             }
-        },
-        "Dr. Ahmed": {
-            "specialty": "Neurologist",
-            "availability": {
-                "Monday to Friday": {"Evening": "7:00 PM - 11:00 PM"},
-                "Saturday": {
-                    "Morning": "10:00 AM - 2:00 PM",
-                    "Evening": "7:00 PM - 11:00 PM"
+
+        if not doctors_data:
+            print("No valid doctor data found in dataset, using fallback...")
+            raise Exception("No valid doctors in dataset")
+
+        print(f"Successfully processed {len(doctors_data)} doctors")
+        return doctors_data
+
+    except Exception as e:
+        print(f"Kaggle dataset failed: {str(e)}")
+        print("Using fallback mock data...")
+
+        # Fallback mock data
+        fallback_doctors = {
+            "Dr. Ahmed Khan": {
+                "specialty": "Cardiologist",
+                "city": "Karachi",
+                "availability": {
+                    "Monday to Friday": {
+                        "Morning": "10:00 AM - 2:00 PM",
+                        "Evening": "7:00 PM - 10:00 PM"
+                    }
+                }
+            },
+            "Dr. Sarah Ali": {
+                "specialty": "Dermatologist",
+                "city": "Lahore",
+                "availability": {
+                    "Monday to Friday": {
+                        "Morning": "9:00 AM - 1:00 PM",
+                        "Evening": "6:00 PM - 9:00 PM"
+                    }
+                }
+            },
+            "Dr. Muhammad Hassan": {
+                "specialty": "General Physician",
+                "city": "Islamabad",
+                "availability": {
+                    "Monday to Friday": {
+                        "Morning": "8:00 AM - 12:00 PM",
+                        "Evening": "5:00 PM - 9:00 PM"
+                    }
+                }
+            },
+            "Dr. Fatima Zahra": {
+                "specialty": "Pediatrician",
+                "city": "Karachi",
+                "availability": {
+                    "Monday to Friday": {
+                        "Morning": "10:00 AM - 2:00 PM",
+                        "Evening": "6:00 PM - 9:00 PM"
+                    }
+                }
+            },
+            "Dr. Omar Farooq": {
+                "specialty": "Orthopedic Surgeon",
+                "city": "Lahore",
+                "availability": {
+                    "Monday to Friday": {
+                        "Morning": "11:00 AM - 3:00 PM",
+                        "Evening": "7:00 PM - 10:00 PM"
+                    }
                 }
             }
         }
-    }
+
+        print(f"Returning {len(fallback_doctors)} fallback doctors")
+        return fallback_doctors
+
+# Search Doctor's
+@function_tool
+def search_doctor(specialty: str = "", city: str = "") -> List[str]:
+    try:
+        print(f"Searching for doctors with specialty: '{specialty}' and city: '{city}'")
+        file_path = "doctors-in-pakistan-dataset.csv"
+        df = kagglehub.load_dataset(
+            KaggleDatasetAdapter.PANDAS,
+            "riyanmujahid/doctors-in-pakistan-dataset",
+            file_path
+        )
+
+        print(f"Dataset loaded with {len(df)} records")
+        print(f"Available columns: {df.columns.tolist()}")
+
+        # Check if required columns exist
+        if "Name" not in df.columns:
+            print("Name column not found, checking available columns...")
+            print(f"Available columns: {df.columns.tolist()}")
+            raise Exception("Name column not found in dataset")
+
+        # Filter based on inputs
+        original_count = len(df)
+
+        if specialty:
+            if "Specialization" in df.columns:
+                df = df[df["Specialization"].str.contains(specialty, case=False, na=False)]
+                print(f"Filtered by specialty '{specialty}': {len(df)} records remaining")
+            else:
+                print(f"Specialization column not found, available columns: {df.columns.tolist()}")
+
+        if city:
+            if "City" in df.columns:
+                df = df[df["City"].str.contains(city, case=False, na=False)]
+                print(f"Filtered by city '{city}': {len(df)} records remaining")
+            else:
+                print(f"City column not found, available columns: {df.columns.tolist()}")
+
+        # Get doctor names
+        doctor_names = df["Name"].tolist()[:10]  # return top 10 matches
+        print(f"Returning {len(doctor_names)} doctor names")
+
+        if not doctor_names:
+            print("No doctors found matching criteria, using fallback data...")
+            # Return fallback doctors if no matches found
+            fallback_doctors = [
+                "Dr. Ahmed Khan (Cardiologist, Karachi)",
+                "Dr. Sarah Ali (Dermatologist, Lahore)",
+                "Dr. Muhammad Hassan (General Physician, Islamabad)",
+                "Dr. Fatima Zahra (Pediatrician, Karachi)",
+                "Dr. Omar Farooq (Orthopedic Surgeon, Lahore)"
+            ]
+            return fallback_doctors[:10]
+
+        return doctor_names
+
+    except Exception as e:
+        print(f"Search failed: {str(e)}")
+        print("Using fallback doctor data...")
+
+        # Return fallback doctors on error
+        fallback_doctors = [
+            "Dr. Ahmed Khan (Cardiologist, Karachi)",
+            "Dr. Sarah Ali (Dermatologist, Lahore)",
+            "Dr. Muhammad Hassan (General Physician, Islamabad)",
+            "Dr. Fatima Zahra (Pediatrician, Karachi)",
+            "Dr. Omar Farooq (Orthopedic Surgeon, Lahore)"
+        ]
+        return fallback_doctors[:10]
+
 
 # 🕊️ Simulate WhatsApp to Doctor
 @function_tool
@@ -210,7 +363,7 @@ Remember details from previous messages. If a user has already provided informat
 """
         ,
         model=model,
-        tools=[get_doctors, send_doctor_request, save_appointment, confirm_patient]
+        tools=[get_doctors, send_doctor_request, save_appointment, confirm_patient,search_doctor]
     )
     
     return agent
