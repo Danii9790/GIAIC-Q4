@@ -3,14 +3,12 @@ import asyncio
 import os
 import json
 import requests
-from dotenv import load_dotenv
-from agents import Agent, Runner, function_tool, OpenAIChatCompletionsModel
-from openai import AsyncOpenAI
-from typing import Dict, List
 import pandas as pd
-import kagglehub
-from kagglehub import KaggleDatasetAdapter
-
+from dotenv import load_dotenv
+from agents import Agent, Runner, function_tool, OpenAIChatCompletionsModel , AsyncOpenAI
+# from openai import AsyncOpenAI, OpenAI
+from typing import Dict, List
+from pinecone import Pinecone
 
 # Configure Streamlit
 os.makedirs(os.path.expanduser('~/.streamlit'), exist_ok=True)
@@ -26,9 +24,9 @@ enableCORS = false
 load_dotenv()
 
 # Twilio / Webhook constants
-VERCEL_WEBHOOK_URL = "https://giaic-q4.vercel.app/set-appointment"  # Update this if needed
+VERCEL_WEBHOOK_URL = "https://giaic-q4.vercel.app/set-appointment"
 TWILIO_FROM = "whatsapp:+14155238886"
-PATIENT_NUMBER = "whatsapp:+923196560895"  # Replace with dynamic value in production
+PATIENT_NUMBER = "whatsapp:+923196560895"
 
 # Gemini Model Setup
 external_client = AsyncOpenAI(
@@ -37,416 +35,359 @@ external_client = AsyncOpenAI(
 )
 model = OpenAIChatCompletionsModel(model="gemini-2.5-flash", openai_client=external_client)
 
-# -------------------- Function Tools --------------------
+# Pinecone RAG Setup
+try:
+    pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    index_name = "healthcare-embeddings"
+    healthcare_index = pc.Index(index_name)
+
+    # OpenAI client for embeddings
+    embedding_client = external_client(
+        api_key=os.getenv("GEMINI_API_KEY"),
+        base_url="https://generativelanguage.googleapis.com/v1beta/"
+    )
+
+    PINECONE_AVAILABLE = True
+    print(f"[OK] Pinecone connected to index: {index_name}")
+except Exception as e:
+    print(f"[WARNING] Pinecone connection failed: {e}")
+    PINECONE_AVAILABLE = False
+    healthcare_index = None
+    embedding_client = None
+
+# -------------------- Constants --------------------
 SANITY_PROJECT_ID = os.getenv("SANITY_PROJECT_ID")
 SANITY_DATASET = os.getenv("SANITY_DATASET")
 SANITY_TOKEN = os.getenv("SANITY_TOKEN")
 SANITY_API_URL = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2023-07-19/data/mutate/{SANITY_DATASET}"
 
-# ✅ Save to Sanity
-@function_tool
-def save_appointment(patientName: str, email: str, doctorName: str, date: str, time: str) -> str:
-    query = {
-        "query": '*[_type == "appointment" && doctorName == $doctorName && date == $date && time == $time][0]',
-        "params": {"doctorName": doctorName, "date": date, "time": time}
+# -------------------- Global Doctor Data --------------------
+DOCTORS_DATA = {
+    "Dr. Ahmed Khan": {
+        "name": "Dr. Ahmed Khan",
+        "specialty": "Cardiologist",
+        "city": "Karachi",
+        "location": "Karachi, Pakistan",
+        "fee": "Rs 2000",
+        "availability": {
+            "Monday to Friday": {
+                "Morning": "10:00 AM - 2:00 PM",
+                "Evening": "7:00 PM - 10:00 PM"
+            }
+        },
+        "can_book_appointment": True
+    },
+    "Dr. Khan": {
+        "name": "Dr. Khan",
+        "specialty": "Neurologist",
+        "city": "Islamabad",
+        "location": "Islamabad, Pakistan",
+        "fee": "Rs 2500",
+        "availability": {
+            "Monday to Friday": {
+                "Morning": "9:00 AM - 1:00 PM",
+                "Evening": "6:00 PM - 9:00 PM"
+            }
+        },
+        "can_book_appointment": True
+    },
+    "Dr. Sarah Ali": {
+        "name": "Dr. Sarah Ali",
+        "specialty": "Dermatologist",
+        "city": "Lahore",
+        "location": "Lahore, Pakistan",
+        "fee": "Rs 1500",
+        "availability": {
+            "Monday to Friday": {
+                "Morning": "9:00 AM - 1:00 PM",
+                "Evening": "6:00 PM - 9:00 PM"
+            }
+        },
+        "can_book_appointment": False
     }
-    check = requests.post(
-        f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2023-07-19/data/query/{SANITY_DATASET}",
-        headers={"Authorization": f"Bearer {SANITY_TOKEN}"},
-        json=query
-    )
-    if check.status_code == 200 and check.json().get("result"):
-        return "⛔ Sorry, this time slot is already booked!"
+}
 
-    doc = {
-        "mutations": [
-            {"create": {
-                "_type": "appointment",
-                "patientName": patientName,
-                "email": email,
-                "doctorName": doctorName,
-                "date": date,
-                "time": time,
-                "status": "pending"
-            }}
-        ]
-    }
-    response = requests.post(SANITY_API_URL, headers={"Authorization": f"Bearer {SANITY_TOKEN}"}, json=doc)
-    return "✅ Appointment saved to Sanity." if response.status_code == 200 else "❌ Sanity save failed."
-
-# 🧠 Doctor Data
-
+# -------------------- Function Tools --------------------
 @function_tool
 def get_doctors() -> Dict:
-    try:
-        print("Attempting to load doctors dataset from Kaggle...")
-        file_path = "doctors-in-pakistan-dataset.csv"
-        df = kagglehub.load_dataset(
-            KaggleDatasetAdapter.PANDAS,
-            "riyanmujahid/doctors-in-pakistan-dataset",
-            file_path
-        )
+    """Get all available doctors with their complete information."""
+    print(f"[OK] Using {len(DOCTORS_DATA)} local doctors")
+    return DOCTORS_DATA
 
-        print(f"Dataset loaded successfully with {len(df)} records")
-        print(f"Available columns: {df.columns.tolist()}")
-
-        doctors_data = {}
-
-        # Convert the DataFrame to dictionary format
-        for _, row in df.iterrows():
-            name = row.get("Name", "Unknown Doctor")
-            specialty = row.get("Specialization", "General")
-            city = row.get("City", "Unknown")
-
-            doctors_data[name] = {
-                "specialty": specialty,
-                "city": city,
-                "availability": {
-                    "Monday to Friday": {
-                        "Morning": "10:00 AM - 2:00 PM",
-                        "Evening": "7:00 PM - 10:00 PM"
-                    }
-                }
-            }
-
-        if not doctors_data:
-            print("No valid doctor data found in dataset, using fallback...")
-            raise Exception("No valid doctors in dataset")
-
-        print(f"Successfully processed {len(doctors_data)} doctors")
-        return doctors_data
-
-    except Exception as e:
-        print(f"Kaggle dataset failed: {str(e)}")
-        print("Using fallback mock data...")
-
-        # Fallback mock data
-        fallback_doctors = {
-            "Dr. Ahmed Khan": {
-                "specialty": "Cardiologist",
-                "city": "Karachi",
-                "availability": {
-                    "Monday to Friday": {
-                        "Morning": "10:00 AM - 2:00 PM",
-                        "Evening": "7:00 PM - 10:00 PM"
-                    }
-                }
-            },
-            "Dr. Sarah Ali": {
-                "specialty": "Dermatologist",
-                "city": "Lahore",
-                "availability": {
-                    "Monday to Friday": {
-                        "Morning": "9:00 AM - 1:00 PM",
-                        "Evening": "6:00 PM - 9:00 PM"
-                    }
-                }
-            },
-            "Dr. Muhammad Hassan": {
-                "specialty": "General Physician",
-                "city": "Islamabad",
-                "availability": {
-                    "Monday to Friday": {
-                        "Morning": "8:00 AM - 12:00 PM",
-                        "Evening": "5:00 PM - 9:00 PM"
-                    }
-                }
-            },
-            "Dr. Fatima Zahra": {
-                "specialty": "Pediatrician",
-                "city": "Karachi",
-                "availability": {
-                    "Monday to Friday": {
-                        "Morning": "10:00 AM - 2:00 PM",
-                        "Evening": "6:00 PM - 9:00 PM"
-                    }
-                }
-            },
-            "Dr. Omar Farooq": {
-                "specialty": "Orthopedic Surgeon",
-                "city": "Lahore",
-                "availability": {
-                    "Monday to Friday": {
-                        "Morning": "11:00 AM - 3:00 PM",
-                        "Evening": "7:00 PM - 10:00 PM"
-                    }
-                }
-            }
-        }
-
-        print(f"Returning {len(fallback_doctors)} fallback doctors")
-        return fallback_doctors
-
-# Search Doctor's
 @function_tool
 def search_doctor(specialty: str = "", city: str = "") -> List[str]:
+    """Search doctors by specialty and/or city."""
+    doctors = get_doctors()
+    results = []
+
+    for name, info in doctors.items():
+        # Filter by specialty
+        if specialty and specialty.lower() not in info["specialty"].lower():
+            continue
+        # Filter by city
+        if city and city.lower() not in info["city"].lower():
+            continue
+
+        booking_status = "✅ Bookable" if info["can_book_appointment"] else "ℹ️ Info only"
+        result = f"{name} ({info['specialty']}, {info['city']}) - {info['fee']} [{booking_status}]"
+        results.append(result)
+
+    return results if results else [
+        "Dr. Ahmed Khan (Cardiologist, Karachi) - Rs 2000 [✅ Bookable]",
+        "Dr. Khan (Neurologist, Islamabad) - Rs 2500 [✅ Bookable]",
+        "Dr. Sarah Ali (Dermatologist, Lahore) - Rs 1500 [ℹ️ Info only]"
+    ]
+
+@function_tool
+def search_medical_information(query: str, top_k: int = 3) -> str:
+    """Search for medical information using RAG."""
+    if not PINECONE_AVAILABLE:
+        return "Medical database is currently unavailable. Please consult a healthcare professional."
+
     try:
-        print(f"Searching for doctors with specialty: '{specialty}' and city: '{city}'")
-        file_path = "doctors-in-pakistan-dataset.csv"
-        df = kagglehub.load_dataset(
-            KaggleDatasetAdapter.PANDAS,
-            "riyanmujahid/doctors-in-pakistan-dataset",
-            file_path
+        print(f"[RAG] Searching medical information for: '{query}'")
+
+        # Create embedding for the query
+        query_embedding = embedding_client.embeddings.create(
+            model="text-embedding-004",
+            input=query
+        ).data[0].embedding
+
+        # Search Pinecone
+        search_results = healthcare_index.query(
+            vector=query_embedding,
+            top_k=top_k,
+            include_metadata=True
         )
 
-        print(f"Dataset loaded with {len(df)} records")
-        print(f"Available columns: {df.columns.tolist()}")
+        if not search_results.get("matches"):
+            return "No specific medical information found. Please consult a healthcare professional."
 
-        # Check if required columns exist
-        if "Name" not in df.columns:
-            print("Name column not found, checking available columns...")
-            print(f"Available columns: {df.columns.tolist()}")
-            raise Exception("Name column not found in dataset")
+        # Format results
+        result_text = f"🏥 **Medical Information: {query}**\n\n"
+        for i, match in enumerate(search_results["matches"][:3], 1):
+            source_file = match["metadata"].get("source_file", "Unknown")
+            text = match["metadata"].get("text", "")[:150] + "..."
+            score = match.get("score", 0)
+            result_text += f"**{i}.** {source_file} (Relevance: {score:.1%})\n{text}\n\n"
 
-        # Filter based on inputs
-        original_count = len(df)
+        result_text += "💡 **Important:** This information is for educational purposes only. Always consult a qualified healthcare professional."
+        return result_text
 
-        if specialty:
-            if "Specialization" in df.columns:
-                df = df[df["Specialization"].str.contains(specialty, case=False, na=False)]
-                print(f"Filtered by specialty '{specialty}': {len(df)} records remaining")
-            else:
-                print(f"Specialization column not found, available columns: {df.columns.tolist()}")
+    except Exception as e:
+        print(f"[ERROR] RAG search failed: {e}")
+        return f"Error searching medical information: {str(e)}"
 
-        if city:
-            if "City" in df.columns:
-                df = df[df["City"].str.contains(city, case=False, na=False)]
-                print(f"Filtered by city '{city}': {len(df)} records remaining")
-            else:
-                print(f"City column not found, available columns: {df.columns.tolist()}")
+@function_tool
+def analyze_symptoms(symptoms: str) -> str:
+    """Analyze symptoms and provide recommendations."""
+    if not PINECONE_AVAILABLE:
+        return "Symptom analysis is currently unavailable. Please consult a healthcare professional."
 
-        # Get doctor names
-        doctor_names = df["Name"].tolist()[:10]  # return top 10 matches
-        print(f"Returning {len(doctor_names)} doctor names")
+    try:
+        print(f"[RAG] Analyzing symptoms: '{symptoms}'")
 
-        if not doctor_names:
-            print("No doctors found matching criteria, using fallback data...")
-            # Return fallback doctors if no matches found
-            fallback_doctors = [
-                "Dr. Ahmed Khan (Cardiologist, Karachi)",
-                "Dr. Sarah Ali (Dermatologist, Lahore)",
-                "Dr. Muhammad Hassan (General Physician, Islamabad)",
-                "Dr. Fatima Zahra (Pediatrician, Karachi)",
-                "Dr. Omar Farooq (Orthopedic Surgeon, Lahore)"
+        # Enhanced symptom query
+        enhanced_query = f"symptoms diagnosis {symptoms} medical condition treatment"
+
+        # Create embedding
+        symptoms_embedding = embedding_client.embeddings.create(
+            model="text-embedding-004",
+            input=enhanced_query
+        ).data[0].embedding
+
+        # Search for relevant medical information
+        search_results = healthcare_index.query(
+            vector=symptoms_embedding,
+            top_k=5,
+            include_metadata=True
+        )
+
+        # Analyze and recommend
+        symptom_analysis = f"🩺 **Symptom Analysis**\n\n"
+        symptom_analysis += f"**Reported Symptoms:** {symptoms}\n\n"
+
+        # Check for critical symptoms
+        critical_keywords = ["chest pain", "difficulty breathing", "severe pain", "emergency"]
+        if any(keyword in symptoms.lower() for keyword in critical_keywords):
+            symptom_analysis += "⚠️ **IMMEDIATE MEDICAL ATTENTION REQUIRED**\n\n"
+            symptom_analysis += "Your symptoms may indicate a serious medical condition. Please seek immediate medical attention or call emergency services.\n\n"
+
+        # Provide doctor recommendations based on symptoms
+        symptom_analysis += "**📋 Recommended Actions:**\n"
+        symptoms_lower = symptoms.lower()
+
+        if any(keyword in symptoms_lower for keyword in ["chest pain", "heart", "palpitation", "blood pressure"]):
+            symptom_analysis += "• Consult Dr. Ahmed Khan (Cardiologist) - Heart conditions\n"
+        elif any(keyword in symptoms_lower for keyword in ["headache", "migraine", "dizziness", "brain"]):
+            symptom_analysis += "• Consult Dr. Khan (Neurologist) - Brain/Nervous system\n"
+        elif any(keyword in symptoms_lower for keyword in ["skin", "rash", "acne", "dermatology"]):
+            symptom_analysis += "• Consider Dr. Sarah Ali (Dermatologist) - Skin conditions\n"
+        else:
+            symptom_analysis += "• Consider consulting Dr. Ahmed Khan (Cardiologist) for general evaluation\n"
+            symptom_analysis += "• Or Dr. Khan (Neurologist) if symptoms persist\n"
+
+        symptom_analysis += "\n⚠️ **Medical Disclaimer:** This analysis is for informational purposes only. Please consult a qualified healthcare professional for proper diagnosis and treatment."
+        return symptom_analysis
+
+    except Exception as e:
+        print(f"[ERROR] Symptom analysis failed: {e}")
+        return f"Error analyzing symptoms: {str(e)}"
+
+@function_tool
+def save_appointment(patientName: str, email: str, doctorName: str, date: str, time: str) -> str:
+    """Save appointment to Sanity database."""
+    # Check if doctor can accept appointments
+    allowed_doctors = ["Dr. Ahmed Khan", "Dr. Khan"]
+    if doctorName not in allowed_doctors:
+        return f"⛔ Appointments are only available for Dr. Ahmed Khan and Dr. Khan. For {doctorName}, please contact them directly."
+
+    try:
+        doc = {
+            "mutations": [
+                {"create": {
+                    "_type": "appointment",
+                    "patientName": patientName,
+                    "email": email,
+                    "doctorName": doctorName,
+                    "date": date,
+                    "time": time,
+                    "status": "pending"
+                }}
             ]
-            return fallback_doctors[:10]
+        }
+        response = requests.post(SANITY_API_URL, headers={"Authorization": f"Bearer {SANITY_TOKEN}"}, json=doc)
 
-        return doctor_names
-
+        if response.status_code == 200:
+            return f"✅ Appointment confirmed for {patientName} with {doctorName} on {date} at {time}."
+        else:
+            return "❌ Failed to save appointment. Please try again."
     except Exception as e:
-        print(f"Search failed: {str(e)}")
-        print("Using fallback doctor data...")
+        return f"❌ Error saving appointment: {str(e)}"
 
-        # Return fallback doctors on error
-        fallback_doctors = [
-            "Dr. Ahmed Khan (Cardiologist, Karachi)",
-            "Dr. Sarah Ali (Dermatologist, Lahore)",
-            "Dr. Muhammad Hassan (General Physician, Islamabad)",
-            "Dr. Fatima Zahra (Pediatrician, Karachi)",
-            "Dr. Omar Farooq (Orthopedic Surgeon, Lahore)"
-        ]
-        return fallback_doctors[:10]
+# -------------------- Main Agent --------------------
+def create_healthcare_agent():
+    """Main healthcare agent with all capabilities"""
+    return Agent(
+        name="Healthcare Assistant",
+        instructions="""
+You are a helpful Healthcare Assistant that can help patients with:
+1. Finding doctors by specialty or location
+2. Analyzing symptoms and providing medical information
+3. Booking appointments with available doctors
+4. Providing health information from our database
 
+Your capabilities:
+- Use get_doctors() to get complete doctor information
+- Use search_doctor() to find doctors by specialty or location
+- Use search_medical_information() to find medical information
+- Use analyze_symptoms() to analyze patient symptoms
+- Use save_appointment() to book appointments (only Dr. Ahmed Khan and Dr. Khan)
 
-# 🕊️ Simulate WhatsApp to Doctor
-@function_tool
-def send_doctor_request(patient_name: str, doctor_name: str, date: str, time: str) -> str:
-    payload = {"patient_name": patient_name, "doctor_name": doctor_name, "date": date, "time": time}
-    try:
-        response = requests.post(VERCEL_WEBHOOK_URL, headers={"Content-Type": "application/json"}, json=payload)
-        return "✅ Doctor notified via webhook!" if response.status_code == 200 else f"❌ Webhook failed ({response.status_code})"
-    except Exception as e:
-        return f"❌ Webhook error: {str(e)}"
+IMPORTANT RESTRICTIONS:
+- Only Dr. Ahmed Khan (Cardiologist) and Dr. Khan (Neurologist) can book appointments
+- Always include medical disclaimers for medical information
+- For critical symptoms (chest pain, difficulty breathing), advise immediate medical attention
+- Always prioritize patient safety
 
-# ✅ Patient Confirmation (Local)
-@function_tool
-def confirm_patient(patient_name: str, doctor_name: str, date: str, time: str) -> str:
-    try:
-        file = "appointments.json"
-        data = json.load(open(file)) if os.path.exists(file) else []
-        for a in data:
-            if a["doctor"] == doctor_name and a["date"] == date and a["time"] == time:
-                return "❌ Doctor already booked at that time."
-        data.append({"patient": patient_name, "doctor": doctor_name, "date": date, "time": time})
-        with open(file, "w") as f: json.dump(data, f, indent=2)
-        return f"✅ Appointment confirmed for {patient_name} with {doctor_name} on {date} at {time}."
-    except Exception as e:
-        return f"❌ Failed to confirm appointment: {e}"
+Be helpful, clear, and professional. If patients need appointments, collect their name, email, preferred doctor, date, and time.
+""",
+        model=model,
+        tools=[get_doctors, search_doctor, search_medical_information, analyze_symptoms, save_appointment]
+    )
 
-# -------------------- Context Management --------------------
+# -------------------- Conversation Context --------------------
 class ConversationContext:
     def __init__(self):
-        self.conversations = []
-        self.current_state = {}
-    
+        self.messages = []
+
     def add_message(self, role: str, content: str):
-        self.conversations.append({"role": role, "content": content})
-    
-    def get_conversation_summary(self) -> str:
-        if not self.conversations:
+        self.messages.append({"role": role, "content": content})
+
+    def get_history(self) -> str:
+        if not self.messages:
             return ""
-        
-        summary = "Here's our conversation history:\n\n"
-        for msg in self.conversations:
+
+        history = "Recent conversation:\n"
+        for msg in self.messages[-3:]:  # Last 3 messages
             prefix = "You" if msg["role"] == "assistant" else "Patient"
-            summary += f"{prefix}: {msg['content']}\n\n"
-        
-        return summary
-    
-    def update_state(self, key, value):
-        self.current_state[key] = value
-    
-    def get_state(self):
-        return self.current_state
+            history += f"{prefix}: {msg['content']}\n"
+        return history
 
-# -------------------- Agent --------------------
-def create_agent_with_context(context: ConversationContext = None):
-    context_str = ""
-    state = {}
-    
-    if context:
-        context_str = context.get_conversation_summary()
-        state = context.get_state()
-    
-    state_str = ""
-    if state:
-        state_str = "\n\nCurrent appointment information collected so far:\n"
-        for key, value in state.items():
-            state_str += f"- {key}: {value}\n"
-    
-    agent = Agent(
-        name="Doctor Assistant",
-        instructions=f"""
-You are a reliable and intelligent Doctor Appointment Assistant.
-Your job is to **help patients book appointments with available doctors**. Follow the exact thinking steps and tool order to ensure safe, error-free bookings.
-
-{context_str}
-{state_str}
-
-========================
-💡 Your Capabilities
-========================
-1. 🩺 **Doctor Info**
-   - Use get_doctors to fetch doctors, their specialties, and schedules.
-   - Only book appointments with valid doctors.
-2. 📅 **Booking an Appointment**
-   - Ask the user for these details **step by step**:
-     - Patient's full name
-     - Doctor's name (must exist in doctor list)
-     - Appointment date (must match availability)
-     - Appointment time (must be in time range)
-   - Validate doctor name and schedule using get_doctors before confirming.
-3. ✅ **After collecting all data:**
-   - Step 1: Call send_doctor_request to notify the doctor (Webhook).
-   - Step 2: Call save_appointment to save to Sanity (backend DB).
-   - Step 3: Call confirm_patient to log it locally and simulate patient notification.
-4. 📲 **WhatsApp Logic**
-   - Do NOT send WhatsApp directly. Assume it is handled outside this agent for now.
-   - Only simulate confirmation.
-========================
-🧠 How to Think Internally
-========================
-- If doctor name is unknown → use get_doctors.
-- If time or day mismatch → explain and ask again.
-- Always check and confirm doctor availability before saving.
-- Use polite tone. Guide the user if they are missing info.
-- Don't skip any tool in the appointment workflow.
-========================
-🔁 Return clear messages
-========================
-- ✅ "Appointment booked successfully."
-- ⛔ "Doctor not available on that day."
-- ❌ "Failed to save appointment to backend."
-NEVER guess or hallucinate schedule info. Always call tools.
-
-Remember details from previous messages. If a user has already provided information like their name, doctor preference, or date, don't ask for it again.
-"""
-        ,
-        model=model,
-        tools=[get_doctors, send_doctor_request, save_appointment, confirm_patient,search_doctor]
-    )
-    
-    return agent
-
+# -------------------- Main Response Function --------------------
 async def get_response(user_input: str, context: ConversationContext) -> str:
-    # Create agent with updated context
-    agent_with_context = create_agent_with_context(context)
-    
-    # Run the agent with the user input
-    run_result = await Runner.run(agent_with_context, user_input)
-    
-    # Add messages to context
-    context.add_message("user", user_input)
-    context.add_message("assistant", run_result.final_output)
-    
-    # Try to extract appointment information from the conversation
-    update_context_state(context, user_input, run_result.final_output)
-    
-    return run_result.final_output
+    """Main function to handle user queries"""
+    try:
+        # Create agent
+        agent = create_healthcare_agent()
 
-def update_context_state(context: ConversationContext, user_input: str, agent_response: str):
-    """Extract and update appointment information in the context state"""
-    
-    # Extract patient name
-    if "name is" in user_input.lower() or "my name is" in user_input.lower():
-        name_parts = user_input.split("is")
-        if len(name_parts) > 1:
-            name = name_parts[1].strip().split(".")[0].strip()
-            context.update_state("patient_name", name)
-    
-    # Extract doctor name
-    doctor_names = ["Dr. Khan", "Dr. Ahmed"]
-    for doctor in doctor_names:
-        if doctor in user_input or doctor in agent_response:
-            context.update_state("doctor_name", doctor)
-    
-    # Extract date (simple pattern matching)
-    date_indicators = ["on ", "for ", "date "]
-    for indicator in date_indicators:
-        if indicator in user_input.lower() and any(month in user_input for month in ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]):
-            parts = user_input.split(indicator)
-            if len(parts) > 1:
-                date_part = parts[1].split(".")[0].strip()
-                # Simple date extraction - in a real app you'd use a more robust method
-                if any(day in date_part for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]):
-                    context.update_state("date", date_part)
-    
-    # Extract time
-    time_indicators = ["at ", "time "]
-    for indicator in time_indicators:
-        if indicator in user_input.lower() and ("AM" in user_input or "PM" in user_input):
-            parts = user_input.split(indicator)
-            if len(parts) > 1:
-                time_part = parts[1].split(".")[0].strip()
-                if "AM" in time_part or "PM" in time_part:
-                    context.update_state("time", time_part)
+        # Add conversation history to prompt
+        history = context.get_history()
+        if history:
+            user_input = f"{history}\n\nPatient: {user_input}"
+
+        # Run the agent
+        run_result = await Runner.run(agent, user_input)
+
+        # Add messages to context
+        context.add_message("user", user_input.split('\n')[-1])
+        context.add_message("assistant", run_result.final_output)
+
+        return run_result.final_output
+
+    except Exception as e:
+        print(f"[ERROR] Agent execution failed: {e}")
+        return "I apologize, but I encountered an error. Please try again or contact support if the problem persists."
 
 # -------------------- Streamlit UI --------------------
-st.set_page_config(page_title="Doctor Appointment Assistant", page_icon="🩺")
-st.title("🩺 Doctor Appointment Assistant")
-st.markdown("This assistant helps you find a doctor and book an appointment via WhatsApp using Twilio.")
+st.set_page_config(page_title="Healthcare Assistant", page_icon="🏥")
+st.title("🏥 AI Healthcare Assistant")
 
-# Initialize conversation context if not exists
+st.markdown("""
+Welcome! I'm here to help you with:
+
+🔍 **Find Doctors** - Search by specialty or location
+🩺 **Symptom Analysis** - Understand your symptoms better
+📅 **Book Appointments** - Schedule with available doctors
+💊 **Medical Information** - Get health information from our database
+
+*Dr. Ahmed Khan (Cardiologist) and Dr. Khan (Neurologist) are available for appointments*
+
+⚠️ **Note:** Medical information is for educational purposes only. Always consult qualified healthcare professionals.
+""")
+
+# Initialize conversation context
 if "context" not in st.session_state:
     st.session_state.context = ConversationContext()
 
 if "history" not in st.session_state:
     st.session_state.history = []
 
-user_input = st.chat_input("Ask about doctor availability or book an appointment...")
+# User input
+user_input = st.chat_input("How can I help you today? (e.g., 'I have chest pain', 'Find a cardiologist', 'Book appointment')")
 
 # Display chat history
 for user_msg, assistant_msg in st.session_state.history:
-    with st.chat_message("user"): st.markdown(user_msg)
-    with st.chat_message("assistant"): st.markdown(assistant_msg)
+    with st.chat_message("user"):
+        st.markdown(user_msg)
+    with st.chat_message("assistant"):
+        st.markdown(assistant_msg)
 
+# Handle new user input
 if user_input:
-    st.session_state.history.append((user_input, "thinking..."))
+    st.session_state.history.append((user_input, "Thinking..."))
     st.rerun()
 
-if st.session_state.history and st.session_state.history[-1][1] == "thinking...":
+# Process the message
+if st.session_state.history and st.session_state.history[-1][1] == "Thinking...":
     last_user_message = st.session_state.history[-1][0]
-    with st.spinner("Thinking..."):
-        response = asyncio.run(get_response(last_user_message, st.session_state.context))
-    st.session_state.history[-1] = (last_user_message, response)
+
+    with st.spinner("Processing your request..."):
+        try:
+            response = asyncio.run(get_response(last_user_message, st.session_state.context))
+            st.session_state.history[-1] = (last_user_message, response)
+        except Exception as e:
+            print(f"Error in main processing: {e}")
+            st.session_state.history[-1] = (last_user_message, "I apologize, but I encountered an error. Please try again.")
+
     st.rerun()
