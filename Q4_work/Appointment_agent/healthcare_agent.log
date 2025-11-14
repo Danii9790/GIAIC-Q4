@@ -1,0 +1,304 @@
+2025-11-13 21:01:50,928 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-13 21:01:50,930 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-13 21:01:53,938 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:01:54,084 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:01:54.084751', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 385, 'execution_time': 3.156033}
+2025-11-13 21:01:54,084 - INFO - [SUCCESS] Response generated in 3.16s
+2025-11-13 21:01:55,038 - WARNING - OPENAI_API_KEY is not set, skipping trace export
+2025-11-13 21:02:22,356 - INFO - [REQUEST] Processing: fever,headache...
+2025-11-13 21:02:22,356 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:02:25,215 - WARNING - OPENAI_API_KEY is not set, skipping trace export
+2025-11-13 21:02:25,303 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:02:25,303 - INFO - Retrying request to /chat/completions in 0.375232 seconds
+2025-11-13 21:02:27,728 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:02:27,730 - INFO - Retrying request to /chat/completions in 0.976273 seconds
+2025-11-13 21:02:30,177 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:02:30,191 - ERROR - [AGENT_EXECUTION_ERROR] Healthcare Assistant Coordinator: Error code: 503 - [{'error': {'code': 503, 'message': 'The model is overloaded. Please try again later.', 'status': 'UNAVAILABLE'}}]
+2025-11-13 21:02:30,191 - ERROR - [AGENT_ERROR] Agent Healthcare Assistant Coordinator: Error code: 503 - [{'error': {'code': 503, 'message': 'The model is overloaded. Please try again later.', 'status': 'UNAVAILABLE'}}]
+2025-11-13 21:02:30,334 - WARNING - OPENAI_API_KEY is not set, skipping trace export
+2025-11-13 21:09:50,681 - INFO - [REQUEST] Processing: Find cardiologist...
+2025-11-13 21:09:50,682 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:09:53,818 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:09:55,042 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:09:55,042 - INFO - Retrying request to /chat/completions in 0.421007 seconds
+2025-11-13 21:09:57,102 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:09:57,359 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:09:57,393 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:09:57.393130', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 17, 'response_length': 89, 'execution_time': 6.711547}
+2025-11-13 21:09:57,393 - INFO - [SUCCESS] Response generated in 6.71s
+2025-11-13 21:09:58,226 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:10:31,430 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-13 21:10:31,430 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-13 21:10:34,640 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:10:35,157 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:10:35,359 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:10:35.359457', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 381, 'execution_time': 3.928908}
+2025-11-13 21:10:35,359 - INFO - [SUCCESS] Response generated in 3.93s
+2025-11-13 21:10:40,755 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:10:50,934 - INFO - [REQUEST] Processing: What is hypertension...
+2025-11-13 21:10:50,938 - INFO - [ROUTING] Using agent: Medical Information Specialist
+2025-11-13 21:10:53,211 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:10:53,344 - INFO - Retrying request to /chat/completions in 0.435981 seconds
+2025-11-13 21:10:55,736 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:10:55,738 - INFO - Retrying request to /chat/completions in 0.752950 seconds
+2025-11-13 21:10:56,797 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:11:01,625 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:11:03,746 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:11:04,248 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:11:04,802 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:11:04,805 - INFO - Retrying request to /chat/completions in 0.456572 seconds
+2025-11-13 21:11:07,716 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:11:08,230 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:11:08.230014', 'agent': 'Medical Information Specialist', 'input_length': 20, 'response_length': 102, 'execution_time': 17.295958}
+2025-11-13 21:11:08,231 - INFO - [SUCCESS] Response generated in 17.30s
+2025-11-13 21:11:10,335 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:11:28,106 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-13 21:11:28,106 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-13 21:11:31,974 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:11:32,165 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:11:32,175 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:11:32.175978', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 381, 'execution_time': 4.076602}
+2025-11-13 21:11:32,175 - INFO - [SUCCESS] Response generated in 4.08s
+2025-11-13 21:11:37,875 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:13:53,833 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-13 21:13:53,833 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-13 21:13:56,857 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:13:56,864 - INFO - Retrying request to /chat/completions in 0.384072 seconds
+2025-11-13 21:13:58,776 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:13:58,777 - INFO - Retrying request to /chat/completions in 0.786981 seconds
+2025-11-13 21:13:59,933 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:14:00,809 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:14:00,809 - ERROR - [AGENT_EXECUTION_ERROR] Emergency Triage: Error code: 503 - [{'error': {'code': 503, 'message': 'The model is overloaded. Please try again later.', 'status': 'UNAVAILABLE'}}]
+2025-11-13 21:14:00,809 - INFO - [FALLBACK] Using fallback response for Emergency Triage
+2025-11-13 21:14:05,744 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:14:33,436 - INFO - [REQUEST] Processing: What is hypertension...
+2025-11-13 21:14:33,436 - INFO - [ROUTING] Using agent: Medical Information Specialist
+2025-11-13 21:14:35,120 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:14:35,120 - INFO - Retrying request to /chat/completions in 0.496733 seconds
+2025-11-13 21:14:37,263 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:14:38,736 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:14:39,236 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:14:40,308 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:14:40,420 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:14:40.420061', 'agent': 'Medical Information Specialist', 'input_length': 20, 'response_length': 246, 'execution_time': 6.98706}
+2025-11-13 21:14:40,420 - INFO - [SUCCESS] Response generated in 6.99s
+2025-11-13 21:14:45,154 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:14:58,780 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-13 21:14:58,792 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-13 21:15:00,564 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:15:00,579 - INFO - Retrying request to /chat/completions in 0.482266 seconds
+2025-11-13 21:15:02,374 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:15:03,240 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:15:03,430 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:15:03.430870', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 321, 'execution_time': 4.650759}
+2025-11-13 21:15:03,430 - INFO - [SUCCESS] Response generated in 4.65s
+2025-11-13 21:15:08,253 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:15:25,375 - INFO - [REQUEST] Processing: show me a doctor list...
+2025-11-13 21:15:25,378 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:15:28,966 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:15:29,450 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:15:30,066 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:15:31,389 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:15:31,395 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:15:31.395945', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 21, 'response_length': 591, 'execution_time': 6.020168}
+2025-11-13 21:15:31,397 - INFO - [SUCCESS] Response generated in 6.02s
+2025-11-13 21:15:36,098 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:16:11,149 - INFO - [REQUEST] Processing: show me karachi cardiologist fetch via pinecone...
+2025-11-13 21:16:11,149 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:16:12,896 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:16:15,305 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:16:17,336 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:16:17,341 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:16:17.341462', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 47, 'response_length': 140, 'execution_time': 6.191785}
+2025-11-13 21:16:17,364 - INFO - [SUCCESS] Response generated in 6.19s
+2025-11-13 21:16:18,735 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:24:03,083 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-13 21:24:03,084 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-13 21:24:06,782 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:24:06,904 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:24:07,068 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:24:07.066055', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 319, 'execution_time': 3.982863}
+2025-11-13 21:24:07,068 - INFO - [SUCCESS] Response generated in 3.98s
+2025-11-13 21:24:13,018 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:24:33,416 - INFO - [REQUEST] Processing: What is hypertension...
+2025-11-13 21:24:33,417 - INFO - [ROUTING] Using agent: Medical Information Specialist
+2025-11-13 21:24:37,249 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:24:38,654 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:24:38,802 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:24:38.802471', 'agent': 'Medical Information Specialist', 'input_length': 20, 'response_length': 207, 'execution_time': 5.385706}
+2025-11-13 21:24:38,802 - INFO - [SUCCESS] Response generated in 5.39s
+2025-11-13 21:24:41,779 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:24:42,749 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:28:58,947 - INFO - [REQUEST] Processing: fever ho raha hn mujy...
+2025-11-13 21:28:58,947 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:29:01,497 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:29:01,504 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:29:01.504254', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 21, 'response_length': 402, 'execution_time': 2.557188}
+2025-11-13 21:29:01,504 - INFO - [SUCCESS] Response generated in 2.56s
+2025-11-13 21:29:04,476 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:29:29,292 - INFO - [REQUEST] Processing: fever ho raha hn mujy...
+2025-11-13 21:29:29,307 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:29:30,820 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:29:32,156 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:29:32,162 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:29:32.162211', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 21, 'response_length': 162, 'execution_time': 2.869914}
+2025-11-13 21:29:32,162 - INFO - [SUCCESS] Response generated in 2.87s
+2025-11-13 21:29:38,959 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:29:46,228 - INFO - [REQUEST] Processing: ok...
+2025-11-13 21:29:46,235 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:29:49,774 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:29:49,920 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:29:49.920430', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 2, 'response_length': 133, 'execution_time': 3.692032}
+2025-11-13 21:29:49,920 - INFO - [SUCCESS] Response generated in 3.69s
+2025-11-13 21:29:50,922 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:29:51,474 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:30:15,959 - INFO - [REQUEST] Processing: fever,headache ho raha hn...
+2025-11-13 21:30:15,959 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:30:18,458 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:30:18,575 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:30:18.575154', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 25, 'response_length': 197, 'execution_time': 2.615729}
+2025-11-13 21:30:18,575 - INFO - [SUCCESS] Response generated in 2.62s
+2025-11-13 21:30:18,894 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:30:19,773 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:30:46,760 - INFO - [REQUEST] Processing: tablet batO kon si lo...
+2025-11-13 21:30:46,760 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:30:49,819 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:30:49,944 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:30:49.942711', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 21, 'response_length': 383, 'execution_time': 3.181826}
+2025-11-13 21:30:49,944 - INFO - [SUCCESS] Response generated in 3.18s
+2025-11-13 21:30:50,861 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:30:51,336 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:37:08,053 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-13 21:37:08,067 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-13 21:37:10,345 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:37:10,349 - INFO - Retrying request to /chat/completions in 0.433640 seconds
+2025-11-13 21:37:12,861 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:37:12,861 - INFO - Retrying request to /chat/completions in 0.984962 seconds
+2025-11-13 21:37:14,222 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:37:17,397 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:37:17,406 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:37:17.406692', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 338, 'execution_time': 9.353229}
+2025-11-13 21:37:17,408 - INFO - [SUCCESS] Response generated in 9.35s
+2025-11-13 21:37:20,769 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:37:56,064 - INFO - [REQUEST] Processing: Find cardiologist...
+2025-11-13 21:37:56,066 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-13 21:37:58,262 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:38:01,406 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 21:38:01,584 - INFO - Retrying request to /chat/completions in 0.421531 seconds
+2025-11-13 21:38:01,987 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:38:06,128 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 21:38:06,354 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T21:38:06.354448', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 17, 'response_length': 110, 'execution_time': 10.290433}
+2025-11-13 21:38:06,354 - INFO - [SUCCESS] Response generated in 10.29s
+2025-11-13 21:38:09,510 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 21:47:15,494 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-6' coro=<AsyncClient.aclose() done, defined at D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\httpx\_client.py:1978> exception=RuntimeError('Event loop is closed')>
+Traceback (most recent call last):
+  File "D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\httpx\_client.py", line 1985, in aclose
+    await self._transport.aclose()
+  File "D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\httpx\_transports\default.py", line 406, in aclose
+    await self._pool.aclose()
+  File "D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\httpcore\_async\connection_pool.py", line 353, in aclose
+    await self._close_connections(closing_connections)
+  File "D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\httpcore\_async\connection_pool.py", line 345, in _close_connections
+    await connection.aclose()
+  File "D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\httpcore\_async\connection.py", line 173, in aclose
+    await self._connection.aclose()
+  File "D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\httpcore\_async\http11.py", line 258, in aclose
+    await self._network_stream.aclose()
+  File "D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\httpcore\_backends\anyio.py", line 53, in aclose
+    await self._stream.aclose()
+  File "D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\anyio\streams\tls.py", line 234, in aclose
+    await self.transport_stream.aclose()
+  File "D:\Q3\GIAIC-Q4\Q4_work\Appointment_agent\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 1314, in aclose
+    self._transport.close()
+  File "C:\Users\admin\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\Lib\asyncio\proactor_events.py", line 109, in close
+    self._loop.call_soon(self._call_connection_lost, None)
+  File "C:\Users\admin\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\Lib\asyncio\base_events.py", line 799, in call_soon
+    self._check_closed()
+  File "C:\Users\admin\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\Lib\asyncio\base_events.py", line 545, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+2025-11-13 22:08:34,255 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-13 22:08:34,260 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-13 22:08:37,791 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 503 Service Unavailable"
+2025-11-13 22:08:37,815 - INFO - Retrying request to /chat/completions in 0.458414 seconds
+2025-11-13 22:08:40,351 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-13 22:08:40,496 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 22:08:41,801 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-13T22:08:41.801982', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 341, 'execution_time': 7.546927}
+2025-11-13 22:08:41,801 - INFO - [SUCCESS] Response generated in 7.55s
+2025-11-13 22:08:46,242 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-13 22:13:55,478 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-13 22:13:55,480 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-13 22:13:59,730 - INFO - Retrying request to /chat/completions in 0.387337 seconds
+2025-11-13 22:14:01,769 - WARNING - [non-fatal] Tracing: request failed: [Errno 11002] getaddrinfo failed
+2025-11-13 22:14:04,372 - INFO - Retrying request to /chat/completions in 0.890633 seconds
+2025-11-13 22:14:07,092 - WARNING - [non-fatal] Tracing: request failed: [Errno 11002] getaddrinfo failed
+2025-11-13 22:14:09,504 - ERROR - [AGENT_EXECUTION_ERROR] Emergency Triage: Connection error.
+2025-11-13 22:14:09,504 - ERROR - [AGENT_ERROR] Agent Emergency Triage: Connection error.
+2025-11-13 22:14:13,445 - WARNING - [non-fatal] Tracing: request failed: [Errno 11002] getaddrinfo failed
+2025-11-13 22:14:13,445 - ERROR - [non-fatal] Tracing: max retries reached, giving up on this batch.
+2025-11-13 22:14:17,689 - WARNING - [non-fatal] Tracing: request failed: [Errno 11002] getaddrinfo failed
+2025-11-13 22:14:22,995 - WARNING - [non-fatal] Tracing: request failed: [Errno 11002] getaddrinfo failed
+2025-11-13 22:14:29,321 - WARNING - [non-fatal] Tracing: request failed: [Errno 11002] getaddrinfo failed
+2025-11-13 22:14:29,321 - ERROR - [non-fatal] Tracing: max retries reached, giving up on this batch.
+2025-11-14 11:00:07,470 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-14 11:00:07,480 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-14 11:00:10,946 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:00:11,168 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:00:11.168681', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 364, 'execution_time': 3.698421}
+2025-11-14 11:00:11,168 - INFO - [SUCCESS] Response generated in 3.70s
+2025-11-14 11:00:13,997 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-14 11:04:25,861 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-14 11:04:25,861 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-14 11:04:26,606 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/chat/completions "HTTP/1.1 400 Bad Request"
+2025-11-14 11:04:26,610 - ERROR - [AGENT_EXECUTION_ERROR] Emergency Triage: Error code: 400 - [{'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelanguage.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.LocalizedMessage', 'locale': 'en-US', 'message': 'API key not valid. Please pass a valid API key.'}]}}]
+2025-11-14 11:04:26,610 - ERROR - [AGENT_ERROR] Agent Emergency Triage: Error code: 400 - [{'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelanguage.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.LocalizedMessage', 'locale': 'en-US', 'message': 'API key not valid. Please pass a valid API key.'}]}}]
+2025-11-14 11:04:31,239 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-14 11:07:30,348 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-14 11:07:30,351 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-14 11:07:32,796 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-14 11:07:33,310 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:07:33,463 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:07:33.463452', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 409, 'execution_time': 3.114841}
+2025-11-14 11:07:33,463 - INFO - [SUCCESS] Response generated in 3.11s
+2025-11-14 11:07:39,006 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-14 11:09:57,826 - INFO - [REQUEST] Processing: Find cardiologist...
+2025-11-14 11:09:57,846 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-14 11:09:59,934 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:09:59,934 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:09:59.934608', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 17, 'response_length': 154, 'execution_time': 2.107871}
+2025-11-14 11:09:59,934 - INFO - [SUCCESS] Response generated in 2.11s
+2025-11-14 11:10:01,183 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-14 11:10:02,257 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-14 11:11:08,122 - INFO - [REQUEST] Processing: Find cardiologist...
+2025-11-14 11:11:08,124 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-14 11:11:11,330 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:11:11,452 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:11:11.452109', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 17, 'response_length': 159, 'execution_time': 3.329622}
+2025-11-14 11:11:11,452 - INFO - [SUCCESS] Response generated in 3.33s
+2025-11-14 11:11:13,952 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-14 11:13:30,155 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-14 11:13:30,155 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-14 11:13:32,311 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:13:32,423 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:13:32.423073', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 289, 'execution_time': 2.267673}
+2025-11-14 11:13:32,424 - INFO - [SUCCESS] Response generated in 2.27s
+2025-11-14 11:13:35,403 - INFO - HTTP Request: POST https://api.openai.com/v1/traces/ingest "HTTP/1.1 204 No Content"
+2025-11-14 11:14:58,969 - INFO - [REQUEST] Processing: Find cardiologist...
+2025-11-14 11:14:58,971 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-14 11:14:58,971 - ERROR - [AGENT_EXECUTION_ERROR] Healthcare Assistant Coordinator: Runner.run() got an unexpected keyword argument 'config'
+2025-11-14 11:14:58,972 - ERROR - [AGENT_ERROR] Agent Healthcare Assistant Coordinator: Runner.run() got an unexpected keyword argument 'config'
+2025-11-14 11:16:11,615 - INFO - [REQUEST] Processing: Find cardiologist...
+2025-11-14 11:16:11,615 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-14 11:16:13,203 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:16:13,203 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:16:13.203601', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 17, 'response_length': 130, 'execution_time': 1.588316}
+2025-11-14 11:16:13,203 - INFO - [SUCCESS] Response generated in 1.59s
+2025-11-14 11:16:37,494 - INFO - [REQUEST] Processing: karachi...
+2025-11-14 11:16:37,494 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-14 11:16:39,531 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:16:41,328 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:16:44,237 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:16:44,388 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:16:44.388720', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 7, 'response_length': 335, 'execution_time': 6.894507}
+2025-11-14 11:16:44,388 - INFO - [SUCCESS] Response generated in 6.89s
+2025-11-14 11:17:38,750 - INFO - [REQUEST] Processing: find cardiologist in islamabad...
+2025-11-14 11:17:38,752 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-14 11:17:40,471 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:17:42,695 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:17:44,437 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:17:44,600 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:17:44.598702', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 30, 'response_length': 259, 'execution_time': 5.84799}
+2025-11-14 11:17:44,600 - INFO - [SUCCESS] Response generated in 5.85s
+2025-11-14 11:18:02,830 - INFO - [REQUEST] Processing: I have chest pain...
+2025-11-14 11:18:02,830 - INFO - [ROUTING] Using agent: Emergency Triage
+2025-11-14 11:18:05,422 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:18:05,548 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:18:05.548841', 'agent': 'Emergency Triage', 'input_length': 17, 'response_length': 352, 'execution_time': 2.718308}
+2025-11-14 11:18:05,548 - INFO - [SUCCESS] Response generated in 2.72s
+2025-11-14 11:21:50,562 - INFO - [REQUEST] Processing: Find cardiologist...
+2025-11-14 11:21:50,562 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-14 11:21:52,355 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:21:52,455 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:21:52.455712', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 17, 'response_length': 119, 'execution_time': 1.892721}
+2025-11-14 11:21:52,455 - INFO - [SUCCESS] Response generated in 1.89s
+2025-11-14 11:22:17,189 - INFO - [REQUEST] Processing: find a cardiologist in karachi city...
+2025-11-14 11:22:17,189 - INFO - [ROUTING] Using agent: Healthcare Assistant Coordinator
+2025-11-14 11:22:19,369 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:22:21,666 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:22:23,791 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-14 11:22:23,919 - INFO - [AGENT_INTERACTION] {'timestamp': '2025-11-14T11:22:23.918607', 'agent': 'Healthcare Assistant Coordinator', 'input_length': 35, 'response_length': 382, 'execution_time': 6.729045}
+2025-11-14 11:22:23,919 - INFO - [SUCCESS] Response generated in 6.73s
